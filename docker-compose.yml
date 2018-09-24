@@ -1,0 +1,22 @@
+version: '3.2'
+services:
+  hs:
+    container_name: hs-auth
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    tty: true
+    volumes:
+      - ./app:/app/app:Z
+      - ./test:/app/test:Z
+      - ./src:/app/src:Z
+      - ./package.yaml:/app/package.yaml:Z
+      - ./stack.yaml:/app/stack.yaml:Z
+    ports:
+      - 8080:8080
+
+  redis:
+    image: redis:5.0-rc-alpine3.8
+
+  psql:
+    image: postgres:11
