@@ -2,10 +2,13 @@
 
 module Routes (routes) where
 
-import Web.Scotty (get, html, ScottyM)
-
+import Web.Scotty (get, html, ScottyM, notFound)
+import Lucid (renderText)
 import Data.Monoid (mconcat)
+import Controllers.Login
+import Controllers.NotFound
 
 routes :: ScottyM ()
 routes = do
-  get "/" $ html $ mconcat ["<h1>Hello world</h1>"]
+  get "/" $ loginController
+  notFound $ notFoundController
