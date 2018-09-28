@@ -7,8 +7,10 @@ import Views.BaseHtml
 
 loginFormView :: Monad m => HtmlT m ()
 loginFormView = baseHtml $
-    div_ $ do
+    div_ [class_ "form-page"] $ do
         (p_ "Login")
-        form_ $
-            (input_ [type_ "text"]) >>
-            (input_ [type_ "text"])
+        form_ $ do
+            input_ [type_ "text"]
+            input_ [type_ "text"]
+            input_ "Login" [type_ "submit"]
+            
