@@ -23,6 +23,7 @@ dependencies:
 - base >= 4.7 && < 5
 - scotty
 - lucid
+- wai-middleware-static
 
 library:
   source-dirs: src

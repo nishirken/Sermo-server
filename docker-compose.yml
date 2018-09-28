@@ -15,8 +15,5 @@ services:
     ports:
       - 8080:8080
 
-  redis:
-    image: redis:5.0-rc-alpine3.8
-
   psql:
     image: postgres:11
