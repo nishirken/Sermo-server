@@ -24,6 +24,7 @@ dependencies:
 - scotty
 - lucid
 - wai-middleware-static
+- text
 
 library:
   source-dirs: src

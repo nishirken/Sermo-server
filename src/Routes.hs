@@ -5,12 +5,14 @@ module Routes (routes) where
 import Web.Scotty (get, html, ScottyM, notFound, middleware)
 import Lucid (renderText)
 import Data.Monoid (mconcat)
-import Controllers.Login
-import Controllers.NotFound
 import Network.Wai.Middleware.Static (static)
+
+import Views.LoginPage
+import Views.NotFound
 
 routes :: ScottyM ()
 routes = do
     middleware static
-    get "/" $ loginController
-    notFound $ notFoundController
+    get "/login" $ html . renderText $ loginPageView True
+    get "/signin" $ html . renderText $ loginPageView False
+    notFound $ html . renderText $ notFoundView
