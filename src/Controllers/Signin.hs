@@ -3,14 +3,30 @@
 module Controllers.Signin where
 
 import Data.Text.Lazy (pack, Text)
+import qualified Data.Text.Lazy as T
 import Web.Scotty (html, ActionM, param, text, redirect, rescue)
 import Lucid (renderText)
 import Views.SigninPage (signinPageView)
 import Models
 
-validatePassword :: Text -> Text -> Either Text Text
-validatePassword pass repeated =
+validatePasswordMatch :: Text -> Text -> Either Text Text
+validatePasswordMatch pass repeated =
     if pass == repeated then Right pass else Left "Passwords doesn't match"
+
+validatePasswordLength :: Text -> Either Text Text
+validatePasswordLength password =
+    if and [l < 21, l > 5] then Right password else Left "Password length incorrect, min length is 6, max is 20"
+        where l = T.length password
+
+validateEmailLength :: Text -> Either Text Text
+validateEmailLength email =
+    if T.length email < 51 then Right email else Left "Email length incorrect, max length is 50"
+
+validate :: Signin -> Either Text Signin
+validate (Signin email' password' repeatedPassword') =
+    validateEmailLength email' >>= \email ->
+        validatePasswordMatch password' repeatedPassword' >>= validatePasswordLength >>=
+            \password -> Right $ Signin email password password
 
 getParam :: Text -> ActionM Text
 getParam paramName = do
@@ -22,6 +38,6 @@ signinController = do
     email <- getParam "email" :: ActionM Text
     password <- getParam "password"
     repeatedPassword <- getParam "repeatedPassword"
-    case (validatePassword password repeatedPassword) of
+    case (validate $ Signin email password repeatedPassword) of
         (Right pass) -> redirect "/"
         (Left errorMessage) -> html . renderText $ signinPageView $ FormPageView errorMessage
