@@ -2,7 +2,7 @@ body {
     font-family: sans-serif;
 }
 
-.form-page {
+.page {
     width: 300px;
     margin: 200px auto;
 }
@@ -60,4 +60,8 @@ a.enabled {
 
 a.enabled:hover {
     background: #EFF4F9;
+}
+
+.error {
+    color: darkred;
 }

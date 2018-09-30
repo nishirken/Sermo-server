@@ -3,15 +3,19 @@
 module Views.LoginPage where
 
 import Lucid
-import Views.BaseHtml
-import Views.Forms
-import Data.Text (pack)
+import Views.BaseHtml (baseHtml)
+import Views.SwitchButtons (switchButtonsView)
+import Views.ErrorTitle (errorTitle)
+import Models
 
-linkClass x = if x then "enabled" else "disabled"
+loginFormView :: Monad m => HtmlT m ()
+loginFormView = form_ [action_ "/login", method_ "post"] $ do
+    input_ [type_ "email", required_ "true", placeholder_ "email"]
+    input_ [type_ "password", required_ "true", placeholder_ "password"]
+    button_ [type_ "submit"] "Log in"
 
-loginPageView :: Monad m => Bool -> HtmlT m ()
-loginPageView isLogin = baseHtml $
-    div_ [class_ "form-page"] $ do
-        a_ [href_ "/login", class_ $ linkClass isLogin] "Log in"
-        a_ [href_ "/signin", class_ $ linkClass $ not isLogin] "Sign in"
-        if isLogin then loginFormView else signinFormView
+loginPageView :: Monad m => FormPageView -> HtmlT m ()
+loginPageView (FormPageView error) = baseHtml $ do
+    switchButtonsView True
+    loginFormView
+    errorTitle error
