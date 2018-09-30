@@ -25,6 +25,7 @@ dependencies:
 - lucid
 - wai-middleware-static
 - text
+- postgresql-simple
 
 library:
   source-dirs: src
