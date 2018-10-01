@@ -25,5 +25,5 @@ routes dbConn = do
     get "/login" $ renderHtml $ loginPageView $ FormPageView ""
     get "/signin" $ renderHtml $ signinPageView $ FormPageView ""
     post "/login" $ loginController
-    post "/signin" $ signinController
+    post "/signin" $ signinController dbConn
     notFound $ renderHtml $ notFoundView
