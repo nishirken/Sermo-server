@@ -9,9 +9,9 @@ import Routes (routes)
 import Database.PostgreSQL.Simple (connectPostgreSQL)
 
 port = 8080
-
+-- TODO: CREATE DB and TABLE on start
 startServer :: IO ()
 startServer =
     (putStrLn $ "Server started at " ++ (show port)) >>
-    (connectPostgreSQL "host='psql' port=5432 user='postgres'") >>= \dbConn ->
+    (connectPostgreSQL "host='psql' port=5432 user='postgres' dbname='auth'") >>= \dbConn ->
         scotty port (routes dbConn)

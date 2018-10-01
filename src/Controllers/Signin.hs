@@ -5,7 +5,8 @@ module Controllers.Signin where
 import Data.Text.Lazy (pack, Text)
 import qualified Data.Text.Lazy as T
 import Web.Scotty (html, ActionM, param, text, redirect, rescue)
-import Database.PostgreSQL.Simple (Connection, executeMany)
+import Database.PostgreSQL.Simple (Connection, execute)
+import Control.Monad.IO.Class (liftIO)
 import Lucid (renderText)
 import Views.SigninPage (signinPageView)
 import Models
@@ -40,5 +41,5 @@ signinController dbConn = do
     password <- getParam "password"
     repeatedPassword <- getParam "repeatedPassword"
     case (validate $ Signin email password repeatedPassword) of
-        (Right _) -> dbConn >>= \conn -> executeMany conn "insert into users values (?,?)" [(email, password)]
+        (Right _) -> (liftIO $ execute dbConn "insert into users values (?,?)" (email, password)) >> redirect "/"
         (Left errorMessage) -> html . renderText $ signinPageView $ FormPageView errorMessage
