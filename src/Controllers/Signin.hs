@@ -36,14 +36,10 @@ validateEmailAlreadyExists dbConn email =
                 _ -> Left $ pack "Email already exists"
 
 validate :: Connection -> Signin -> Either Text Signin
-validate dbConn (Signin email' password' repeatedPassword') = do
-    existedEmail <- validateEmailAlreadyExists dbConn email'
-    case existedEmail of
-        (Right e) -> do
-            email <- validateEmailLength e
-            password <- validatePasswordMatch password' repeatedPassword' >>= validatePasswordLength
+validate dbConn (Signin email' password' repeatedPassword') =
+    validateEmailAlreadyExists dbConn email' >>= validateEmailLength >>= \email ->
+        validatePasswordMatch password' repeatedPassword' >>= validatePasswordLength >>= \password ->
             Right $ Signin email password password
-        (Left err) -> Left err
 
 getParam :: Text -> ActionM Text
 getParam paramName = do
