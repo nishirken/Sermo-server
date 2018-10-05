@@ -26,6 +26,7 @@ dependencies:
 - wai-middleware-static
 - text
 - postgresql-simple
+- mtl
 
 library:
   source-dirs: src

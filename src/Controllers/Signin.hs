@@ -7,6 +7,7 @@ import qualified Data.Text.Lazy as T
 import Web.Scotty (html, ActionM, param, text, redirect, rescue)
 import Database.PostgreSQL.Simple (Connection, execute, Only (..), query)
 import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Except (ExceptT (..), runExceptT, liftEither)
 import Lucid (renderText)
 import Views.SigninPage (signinPageView)
 import Models
@@ -27,19 +28,21 @@ validateEmailLength email =
 getUserCredsByEmail :: Connection -> Text -> IO [(Text, Text)]
 getUserCredsByEmail dbConn email = query dbConn "select email, password from users where email = ?" (Only email)
 
-validateEmailAlreadyExists :: Connection -> Text -> IO (Either Text Text)
-validateEmailAlreadyExists dbConn email =
-    fmap checkIfEmpty $ getUserCredsByEmail dbConn email
-        where
-            checkIfEmpty rows = case (length rows) of
-                0 -> Right email
-                _ -> Left $ pack "Email already exists"
+validateEmailAlreadyExists :: Connection -> Text -> ExceptT Text IO Text
+validateEmailAlreadyExists dbConn email = ExceptT $ fmap checkEmpty $ getUserCredsByEmail dbConn email
+    where
+        checkEmpty rows = case (length rows) of
+            0 -> Right email
+            _ -> Left $ pack "Email already exists"
 
 validate :: Connection -> Signin -> Either Text Signin
-validate dbConn (Signin email' password' repeatedPassword') =
-    validateEmailAlreadyExists dbConn email' >>= validateEmailLength >>= \email ->
-        validatePasswordMatch password' repeatedPassword' >>= validatePasswordLength >>= \password ->
-            Right $ Signin email password password
+validate dbConn (Signin email' password' repeatedPassword') = do
+    res <- runExceptT $ validateEmailAlreadyExists dbConn email'
+    case res of
+        (Right existedEmail) -> validateEmailLength existedEmail >>= \email ->
+            validatePasswordMatch password' repeatedPassword' >>= validatePasswordLength >>= \password ->
+                Right $ Signin email password password
+        (Left error) -> Left error
 
 getParam :: Text -> ActionM Text
 getParam paramName = do
