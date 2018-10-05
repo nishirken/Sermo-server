@@ -28,21 +28,19 @@ validateEmailLength email =
 getUserCredsByEmail :: Connection -> Text -> IO [(Text, Text)]
 getUserCredsByEmail dbConn email = query dbConn "select email, password from users where email = ?" (Only email)
 
-validateEmailAlreadyExists :: Connection -> Text -> ExceptT Text IO Text
-validateEmailAlreadyExists dbConn email = ExceptT $ fmap checkEmpty $ getUserCredsByEmail dbConn email
-    where
-        checkEmpty rows = case (length rows) of
-            0 -> Right email
-            _ -> Left $ pack "Email already exists"
+validateEmail :: Connection -> Text -> ExceptT Text IO Text
+validateEmail dbConn email =
+    ExceptT $ fmap checkIfEmpty $ getUserCredsByEmail dbConn email
+        where
+            checkIfEmpty rows = case (length rows) of
+                0 -> validateEmailLength email
+                _ -> Left $ pack "Email already exists"
 
-validate :: Connection -> Signin -> Either Text Signin
-validate dbConn (Signin email' password' repeatedPassword') = do
-    res <- runExceptT $ validateEmailAlreadyExists dbConn email'
-    case res of
-        (Right existedEmail) -> validateEmailLength existedEmail >>= \email ->
-            validatePasswordMatch password' repeatedPassword' >>= validatePasswordLength >>= \password ->
-                Right $ Signin email password password
-        (Left error) -> Left error
+validate :: Connection -> Signin -> ExceptT Text IO Signin
+validate dbConn (Signin email' password' repeatedPassword') =
+    validateEmail dbConn email' >>= \email -> ExceptT $ return $
+        validatePasswordMatch password' repeatedPassword' >>= validatePasswordLength >>= \password ->
+            Right $ Signin email password password
 
 getParam :: Text -> ActionM Text
 getParam paramName = do
@@ -54,6 +52,7 @@ signinController dbConn = do
     email <- getParam "email" :: ActionM Text
     password <- getParam "password"
     repeatedPassword <- getParam "repeatedPassword"
-    case (validate dbConn $ Signin email password repeatedPassword) of
+    validated <- (liftIO . runExceptT) $ validate dbConn $ Signin email password repeatedPassword
+    case (validated) of
         (Right _) -> (liftIO $ execute dbConn "insert into users values (?,?)" (email, password)) >> redirect "/"
         (Left errorMessage) -> html . renderText $ signinPageView $ FormPageView errorMessage
