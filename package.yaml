@@ -27,6 +27,7 @@ dependencies:
 - text
 - postgresql-simple
 - mtl
+- jose
 
 library:
   source-dirs: src
