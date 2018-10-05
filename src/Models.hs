@@ -2,7 +2,7 @@ module Models where
 
 import Data.Text.Lazy (Text)
 
-data Signin = Signin {
+data SignIn = SignIn {
     email :: Text
     , password :: Text
     , repeatedPassword :: Text

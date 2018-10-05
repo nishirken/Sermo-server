@@ -8,10 +8,10 @@ import Data.Monoid (mconcat)
 import Network.Wai.Middleware.Static (static)
 import Database.PostgreSQL.Simple (Connection)
 
-import Controllers.Login
-import Controllers.Signin
-import Views.LoginPage
-import Views.SigninPage
+import Controllers.LogIn
+import Controllers.SignIn
+import Views.LogInPage
+import Views.SignInPage
 import Views.NotFound
 import Views.AppPage
 import Models
@@ -22,8 +22,8 @@ routes :: Connection -> ScottyM ()
 routes dbConn = do
     middleware static
     get "/" $ renderHtml $ appPageView
-    get "/login" $ renderHtml $ loginPageView $ FormPageView ""
-    get "/signin" $ renderHtml $ signinPageView $ FormPageView ""
-    post "/login" $ loginController
-    post "/signin" $ signinController dbConn
+    get "/login" $ renderHtml $ logInPageView $ FormPageView ""
+    get "/SignIn" $ renderHtml $ signInPageView $ FormPageView ""
+    post "/login" $ logInController
+    post "/SignIn" $ signInController dbConn
     notFound $ renderHtml $ notFoundView

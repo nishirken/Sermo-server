@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Views.LoginPage where
+module Views.LogInPage where
 
 import Lucid
 import Views.BaseHtml (baseHtml)
@@ -8,14 +8,14 @@ import Views.SwitchButtons (switchButtonsView)
 import Views.ErrorTitle (errorTitle)
 import Models
 
-loginFormView :: Monad m => HtmlT m ()
-loginFormView = form_ [action_ "/login", method_ "post"] $ do
+logInFormView :: Monad m => HtmlT m ()
+logInFormView = form_ [action_ "/login", method_ "post"] $ do
     input_ [type_ "email", required_ "true", placeholder_ "email"]
     input_ [type_ "password", required_ "true", placeholder_ "password"]
     button_ [type_ "submit"] "Log in"
 
-loginPageView :: Monad m => FormPageView -> HtmlT m ()
-loginPageView (FormPageView error) = baseHtml $ do
+logInPageView :: Monad m => FormPageView -> HtmlT m ()
+logInPageView (FormPageView error) = baseHtml $ do
     switchButtonsView True
-    loginFormView
+    logInFormView
     errorTitle error

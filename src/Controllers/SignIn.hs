@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Controllers.Signin where
+module Controllers.SignIn where
 
 import Data.Text.Lazy (pack, Text)
 import qualified Data.Text.Lazy as T
@@ -9,7 +9,7 @@ import Database.PostgreSQL.Simple (Connection, execute, Only (..), query)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Except (ExceptT (..), runExceptT, liftEither)
 import Lucid (renderText)
-import Views.SigninPage (signinPageView)
+import Views.SignInPage (signInPageView)
 import Models
 
 validatePasswordMatch :: Text -> Text -> Either Text Text
@@ -36,23 +36,23 @@ validateEmail dbConn email =
                 0 -> validateEmailLength email
                 _ -> Left $ pack "Email already exists"
 
-validate :: Connection -> Signin -> ExceptT Text IO Signin
-validate dbConn (Signin email' password' repeatedPassword') =
+validate :: Connection -> SignIn -> ExceptT Text IO SignIn
+validate dbConn (SignIn email' password' repeatedPassword') =
     validateEmail dbConn email' >>= \email -> ExceptT $ return $
         validatePasswordMatch password' repeatedPassword' >>= validatePasswordLength >>= \password ->
-            Right $ Signin email password password
+            Right $ SignIn email password password
 
 getParam :: Text -> ActionM Text
 getParam paramName = do
     param paramName `rescue`
         \errorMessage -> return errorMessage
 
-signinController :: Connection -> ActionM ()
-signinController dbConn = do
+signInController :: Connection -> ActionM ()
+signInController dbConn = do
     email <- getParam "email" :: ActionM Text
     password <- getParam "password"
     repeatedPassword <- getParam "repeatedPassword"
-    validated <- (liftIO . runExceptT) $ validate dbConn $ Signin email password repeatedPassword
+    validated <- liftIO . runExceptT $ validate dbConn $ SignIn email password repeatedPassword
     case (validated) of
         (Right _) -> (liftIO $ execute dbConn "insert into users values (?,?)" (email, password)) >> redirect "/"
-        (Left errorMessage) -> html . renderText $ signinPageView $ FormPageView errorMessage
+        (Left errorMessage) -> html . renderText $ signInPageView $ FormPageView errorMessage
