@@ -10,27 +10,13 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Except (ExceptT (..), runExceptT, liftEither)
 import Lucid (renderText)
 import Views.SignInPage (signInPageView)
+import Db (getUserByEmail)
 import Models
-
-validatePasswordMatch :: Text -> Text -> Either Text Text
-validatePasswordMatch pass repeated =
-    if pass == repeated then Right pass else Left "Passwords doesn't match"
-
-validatePasswordLength :: Text -> Either Text Text
-validatePasswordLength password =
-    if and [l < 21, l > 5] then Right password else Left "Password length incorrect, min length is 6, max is 20"
-        where l = T.length password
-
-validateEmailLength :: Text -> Either Text Text
-validateEmailLength email =
-    if T.length email < 51 then Right email else Left "Email length incorrect, max length is 50"
-
-getUserCredsByEmail :: Connection -> Text -> IO [(Text, Text)]
-getUserCredsByEmail dbConn email = query dbConn "select email, password from users where email = ?" (Only email)
+import Validation (validateEmailLength, validatePasswordMatch, validatePasswordLength)
 
 validateEmail :: Connection -> Text -> ExceptT Text IO Text
 validateEmail dbConn email =
-    ExceptT $ fmap checkIfEmpty $ getUserCredsByEmail dbConn email
+    ExceptT $ fmap checkIfEmpty $ getUserByEmail dbConn email
         where
             checkIfEmpty rows = case (length rows) of
                 0 -> validateEmailLength email
