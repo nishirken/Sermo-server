@@ -23,7 +23,7 @@ routes dbConn = do
     middleware static
     get "/" $ renderHtml $ appPageView
     get "/login" $ renderHtml $ logInPageView $ FormPageView ""
-    get "/SignIn" $ renderHtml $ signInPageView $ FormPageView ""
-    post "/login" $ logInController
-    post "/SignIn" $ signInController dbConn
+    get "/signin" $ renderHtml $ signInPageView $ FormPageView ""
+    post "/login" $ logInController dbConn
+    post "/signin" $ signInController dbConn
     notFound $ renderHtml $ notFoundView

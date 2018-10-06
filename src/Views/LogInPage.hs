@@ -10,8 +10,8 @@ import Models
 
 logInFormView :: Monad m => HtmlT m ()
 logInFormView = form_ [action_ "/login", method_ "post"] $ do
-    input_ [type_ "email", required_ "true", placeholder_ "email"]
-    input_ [type_ "password", required_ "true", placeholder_ "password"]
+    input_ [type_ "email", required_ "true", placeholder_ "email", name_ "email"]
+    input_ [type_ "password", required_ "true", placeholder_ "password", name_ "password"]
     button_ [type_ "submit"] "Log in"
 
 logInPageView :: Monad m => FormPageView -> HtmlT m ()
