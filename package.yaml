@@ -27,7 +27,9 @@ dependencies:
 - text
 - postgresql-simple
 - mtl
-- jose
+- jwt
+- time
+- cookie
 
 library:
   source-dirs: src

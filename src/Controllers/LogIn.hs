@@ -2,12 +2,14 @@
 
 module Controllers.LogIn where
 
-import Data.Text.Lazy (Text)
+import Data.Text.Lazy (Text, pack, unpack)
+import Data.Text.Encoding (encodeUtf8)
 import Control.Monad.IO.Class (liftIO)
-import Web.Scotty (ActionM, html, redirect)
+import Web.Scotty (ActionM, addHeader, html, redirect)
 import Lucid (renderText)
 import Database.PostgreSQL.Simple (Connection)
 import Controllers.Utils (getParam)
+import Controllers.JWT (createToken)
 import Data.Either (either)
 import Control.Monad.Except (ExceptT (..), runExceptT)
 import Views.LogInPage (logInPageView)
@@ -23,11 +25,14 @@ validate dbConn email password = ExceptT $ getUserByEmail dbConn email >>= \rows
         [] -> pure $ Left errorMessage
         [(email', password')] -> pure $ validatePasswordMatch password password'
 
+makeTokenHeader :: Text -> Text
+makeTokenHeader email = pack $ "token=" ++ (unpack $ createToken email)
+
 logInController :: Connection -> ActionM ()
 logInController dbConn = do
     email <- getParam "email"
     password <- getParam "password"
     validated <- liftIO . runExceptT $ validate dbConn email password
     case (validated) of
-        (Right _) -> redirect "/"
+        (Right _) -> (addHeader "Set-Cookie" $ makeTokenHeader email) >> redirect "/"
         (Left errorMessage) -> html . renderText $ logInPageView $ FormPageView errorMessage
