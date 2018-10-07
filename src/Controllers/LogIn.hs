@@ -25,8 +25,10 @@ validate dbConn email password = ExceptT $ getUserByEmail dbConn email >>= \rows
         [] -> pure $ Left errorMessage
         [(email', password')] -> pure $ validatePasswordMatch password password'
 
-makeTokenHeader :: Text -> Text
-makeTokenHeader email = pack $ "token=" ++ (unpack $ createToken email)
+makeTokenHeader :: Text -> IO Text
+makeTokenHeader email = do
+    token <- createToken email
+    pure $ "token=" <> token
 
 logInController :: Connection -> ActionM ()
 logInController dbConn = do
@@ -34,5 +36,8 @@ logInController dbConn = do
     password <- getParam "password"
     validated <- liftIO . runExceptT $ validate dbConn email password
     case (validated) of
-        (Right _) -> (addHeader "Set-Cookie" $ makeTokenHeader email) >> redirect "/"
+        (Right _) -> do
+            token <- liftIO $ makeTokenHeader email
+            addHeader "Set-Cookie" token
+            redirect "/"
         (Left errorMessage) -> html . renderText $ logInPageView $ FormPageView errorMessage
