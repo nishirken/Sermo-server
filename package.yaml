@@ -30,6 +30,9 @@ dependencies:
 - jwt
 - time
 - cookie
+- wai
+- transformers
+- http-types
 
 library:
   source-dirs: src

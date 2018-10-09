@@ -10,6 +10,7 @@ import Database.PostgreSQL.Simple (Connection)
 
 import Controllers.LogIn
 import Controllers.SignIn
+import Controllers.Auth (authMiddleware)
 import Views.LogInPage
 import Views.SignInPage
 import Views.NotFound
@@ -21,6 +22,7 @@ renderHtml = html . renderText
 routes :: Connection -> ScottyM ()
 routes dbConn = do
     middleware static
+    middleware authMiddleware
     get "/" $ renderHtml $ appPageView
     get "/login" $ renderHtml $ logInPageView $ FormPageView ""
     get "/signin" $ renderHtml $ signInPageView $ FormPageView ""
