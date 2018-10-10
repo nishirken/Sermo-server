@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module Routes (routes) where
 
@@ -16,16 +17,17 @@ import Views.SignInPage
 import Views.NotFound
 import Views.AppPage
 import Models
+import Config (Config (..))
 
 renderHtml = html . renderText
 
-routes :: Connection -> ScottyM ()
-routes dbConn = do
+routes :: Connection -> Config -> ScottyM ()
+routes dbConn Config{ authKey }  = do
     middleware static
-    middleware authMiddleware
+    middleware $ authMiddleware authKey
     get "/" $ renderHtml $ appPageView
     get "/login" $ renderHtml $ logInPageView $ FormPageView ""
     get "/signin" $ renderHtml $ signInPageView $ FormPageView ""
-    post "/login" $ logInController dbConn
+    post "/login" $ logInController authKey dbConn
     post "/signin" $ signInController dbConn
     notFound $ renderHtml $ notFoundView

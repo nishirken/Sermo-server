@@ -4,3 +4,4 @@
 hs-auth-example.cabal
 *~
 /cabal.config
+/config.yaml

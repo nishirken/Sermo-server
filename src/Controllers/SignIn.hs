@@ -10,7 +10,7 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Except (ExceptT (..), runExceptT, liftEither)
 import Lucid (renderText)
 import Views.SignInPage (signInPageView)
-import Db (getUserByEmail)
+import Db (getUserByEmail, setUser)
 import Models
 import Controllers.Utils (getParam)
 import Validation (validateEmailLength, validatePasswordMatch, validatePasswordLength)
@@ -35,6 +35,5 @@ signInController dbConn = do
     password <- getParam "password"
     repeatedPassword <- getParam "repeatedPassword"
     validated <- liftIO . runExceptT $ validate dbConn $ SignIn email password repeatedPassword
-    case (validated) of
-        (Right _) -> (liftIO $ execute dbConn "insert into users values (?,?)" (email, password)) >> redirect "/"
-        (Left errorMessage) -> html . renderText $ signInPageView $ FormPageView errorMessage
+    liftIO (setUser dbConn email password)
+    redirect "/"

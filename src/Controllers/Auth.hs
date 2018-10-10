@@ -36,16 +36,15 @@ import Network.Wai (Middleware, mapResponseHeaders, mapResponseStatus)
 import Network.Wai.Internal (Request (..), Response (..))
 import Network.HTTP.Types (status302)
 
-secretKey = "my-secret-key"
 expirationTime :: IO NominalDiffTime
 expirationTime = utcTimeToPOSIXSeconds . (addUTCTime (60 * 60 :: NominalDiffTime)) <$> getCurrentTime
 
-createToken :: Text -> IO Text
-createToken email = do
+createToken :: Text -> Text -> IO Text
+createToken secretKey userId = do
     expiration <- expirationTime
-    pure $ fromStrict $ encodeSigned HS256 (secret secretKey) def {
+    pure $ fromStrict $ encodeSigned HS256 (secret $ toStrict secretKey) def {
        iss = stringOrURI $ "hs-auth"
-       , jti = stringOrURI $ toStrict email
+       , jti = stringOrURI $ toStrict userId
        , nbf = numericDate expiration
    }
 
@@ -57,8 +56,8 @@ checkExpired claimsSet@JWTClaimsSet{ nbf } =
             pure $ if diffTime > 0 then Just claimsSet else Nothing
         Nothing -> pure Nothing
 
-verifiedToken :: Text -> Maybe (JWT VerifiedJWT)
-verifiedToken header = tokenFromHeader >>= \token -> decodeAndVerifySignature (secret secretKey) (toStrict token)
+verifiedToken :: Text -> Text -> Maybe (JWT VerifiedJWT)
+verifiedToken key header = tokenFromHeader >>= \token -> decodeAndVerifySignature (secret $ toStrict key) (toStrict token)
     where
         tokenFromHeader = case splitOn "=" header of
             [x, y] -> Just y
@@ -76,14 +75,14 @@ redirectFromLogin Request{ rawPathInfo } response =
         ((mapResponseStatus $ const status302) .
         (mapResponseHeaders $ (:) ("Location", "/"))) response
 
-authMiddleware :: Middleware
-authMiddleware app req@(Request{ requestHeaders, pathInfo }) response =
+authMiddleware :: Text -> Middleware
+authMiddleware authKey app req@(Request{ requestHeaders, pathInfo }) response =
     let cookieHeader = find (\(headerName, _) -> headerName == "Cookie") requestHeaders in
         do
             token <- pure (
                 do
                     (_, headerValue) <- cookieHeader
-                    verified <- verifiedToken $ (fromStrict . decodeUtf8) headerValue
+                    verified <- verifiedToken authKey $ (fromStrict . decodeUtf8) headerValue
                     Just verified
                 )
             notExpiredToken <- (
@@ -93,5 +92,5 @@ authMiddleware app req@(Request{ requestHeaders, pathInfo }) response =
                         Nothing -> pure $ Nothing
                 )
             case notExpiredToken of
-                (Just _) -> (putStrLn $ show req) >> app req (response . (redirectFromLogin req))
+                (Just _) -> app req (response . (redirectFromLogin req))
                 Nothing -> app req (response . (redirectToLogin req))
