@@ -33,6 +33,7 @@ dependencies:
 - wai
 - transformers
 - http-types
+- scrypt
 
 library:
   source-dirs: src

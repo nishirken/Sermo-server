@@ -2,7 +2,7 @@
 
 module Controllers.LogIn where
 
-import Data.Text.Lazy (Text, pack, unpack)
+import Data.Text.Lazy (Text, pack, unpack, toStrict)
 import Data.Text.Encoding (encodeUtf8)
 import Control.Monad.IO.Class (liftIO)
 import Web.Scotty (ActionM, addHeader, html, redirect)
@@ -14,20 +14,27 @@ import Data.Either (either)
 import Control.Monad.Except (ExceptT (..), runExceptT)
 import Views.LogInPage (logInPageView)
 import Models (FormPageView (..))
-import Validation (validatePasswordMatch)
 import Db (getUserByEmail)
+import Crypto.Scrypt (defaultParams, EncryptedPass (..), Pass (..), verifyPass)
 
 errorMessage = "Incorrect password or email"
 
-validate :: Connection -> Text -> Text -> ExceptT Text IO Text
+verify :: Text -> Text -> Bool
+verify password passwordHash =
+    fst $ verifyPass
+        defaultParams
+        ((Pass . encodeUtf8 . toStrict) password)
+        ((EncryptedPass . encodeUtf8 . toStrict) passwordHash)
+
+validate :: Connection -> Text -> Text -> ExceptT Text IO Int
 validate dbConn email password = ExceptT $ getUserByEmail dbConn email >>= \rows ->
     case (rows) of
         [] -> pure $ Left errorMessage
-        [(email', password')] -> pure $ validatePasswordMatch password password'
+        [(id, email', password')] -> pure $ if verify password password' then Right id else Left errorMessage
 
-makeTokenHeader :: Text -> IO Text
-makeTokenHeader email = do
-    token <- createToken email
+makeTokenHeader :: Int -> IO Text
+makeTokenHeader userId = do
+    token <- createToken $ (pack . show) userId
     pure $ "token=" <> token
 
 logInController :: Connection -> ActionM ()
@@ -36,8 +43,8 @@ logInController dbConn = do
     password <- getParam "password"
     validated <- liftIO . runExceptT $ validate dbConn email password
     case (validated) of
-        (Right _) -> do
-            token <- liftIO $ makeTokenHeader email
+        (Right userId) -> do
+            token <- liftIO $ makeTokenHeader userId
             addHeader "Set-Cookie" token
             redirect "/"
         (Left errorMessage) -> html . renderText $ logInPageView $ FormPageView errorMessage

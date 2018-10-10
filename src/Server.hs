@@ -10,9 +10,13 @@ import Routes (routes)
 import Database.PostgreSQL.Simple (Connection, connectPostgreSQL, execute)
 
 prepareDb :: Connection -> IO Connection
-prepareDb conn =
-    (execute conn "create table if not exists users (email varchar(50), password varchar(200))" ()) >>
-        return conn
+prepareDb conn = do
+    execute
+        conn
+        ("create table if not exists users " <>
+        "(id serial primary key, email varchar(50) not null, password varchar(500) not null unique)")
+        ()
+    return conn
 
 port = 8080
 

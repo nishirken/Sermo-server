@@ -41,11 +41,11 @@ expirationTime :: IO NominalDiffTime
 expirationTime = utcTimeToPOSIXSeconds . (addUTCTime (60 * 60 :: NominalDiffTime)) <$> getCurrentTime
 
 createToken :: Text -> IO Text
-createToken email = do
+createToken userId = do
     expiration <- expirationTime
     pure $ fromStrict $ encodeSigned HS256 (secret secretKey) def {
        iss = stringOrURI $ "hs-auth"
-       , jti = stringOrURI $ toStrict email
+       , jti = stringOrURI $ toStrict userId
        , nbf = numericDate expiration
    }
 
@@ -93,5 +93,5 @@ authMiddleware app req@(Request{ requestHeaders, pathInfo }) response =
                         Nothing -> pure $ Nothing
                 )
             case notExpiredToken of
-                (Just _) -> (putStrLn $ show req) >> app req (response . (redirectFromLogin req))
+                (Just _) -> app req (response . (redirectFromLogin req))
                 Nothing -> app req (response . (redirectToLogin req))
