@@ -37,6 +37,11 @@ makeTokenHeader authKey userId = do
     token <- createToken authKey $ (pack . show) userId
     pure $ "token=" <> token
 
+setAuthCookie :: Text -> Int -> ActionM ()
+setAuthCookie authKey userId = do
+   token <- liftIO $ makeTokenHeader authKey userId
+   addHeader "Set-Cookie" token
+
 logInController :: Text -> Connection -> ActionM ()
 logInController authKey dbConn = do
     email <- getParam "email"
@@ -44,7 +49,6 @@ logInController authKey dbConn = do
     validated <- liftIO . runExceptT $ validate dbConn email password
     case (validated) of
         (Right userId) -> do
-            token <- liftIO $ makeTokenHeader authKey userId
-            addHeader "Set-Cookie" token
+            setAuthCookie authKey userId
             redirect "/"
         (Left errorMessage) -> html . renderText $ logInPageView $ FormPageView errorMessage

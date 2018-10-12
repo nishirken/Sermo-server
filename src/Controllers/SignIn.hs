@@ -13,6 +13,7 @@ import Views.SignInPage (signInPageView)
 import Db (getUserByEmail, setUser)
 import Models
 import Controllers.Utils (getParam)
+import Controllers.LogIn (setAuthCookie)
 import Validation (validateEmailLength, validatePasswordMatch, validatePasswordLength)
 
 validateEmail :: Connection -> Text -> ExceptT Text IO Text
@@ -29,11 +30,12 @@ validate dbConn (SignIn email' password' repeatedPassword') =
         validatePasswordMatch password' repeatedPassword' >>= validatePasswordLength >>= \password ->
             Right $ SignIn email password password
 
-signInController :: Connection -> ActionM ()
-signInController dbConn = do
+signInController :: Text -> Connection -> ActionM ()
+signInController authKey dbConn = do
     email <- getParam "email"
     password <- getParam "password"
     repeatedPassword <- getParam "repeatedPassword"
     validated <- liftIO . runExceptT $ validate dbConn $ SignIn email password repeatedPassword
     liftIO (setUser dbConn email password)
+    setAuthCookie authKey 2
     redirect "/"
