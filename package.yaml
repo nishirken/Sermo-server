@@ -1,6 +1,6 @@
-name:                hs-auth-example
+name:                hs-auth
 version:             0.1.0.0
-github:              "nishirken/hs-auth-example"
+github:              "nishirken/hs-auth"
 license:             BSD3
 author:              "Dmitry Skurikhin"
 maintainer:          "dmitrii.sk@gmail.com"
@@ -33,6 +33,9 @@ dependencies:
 - wai
 - transformers
 - http-types
+- scrypt
+- yaml
+- directory
 
 library:
   source-dirs: src

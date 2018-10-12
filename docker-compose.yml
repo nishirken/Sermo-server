@@ -13,6 +13,7 @@ services:
       - ./static:/app/static:Z
       - ./package.yaml:/app/package.yaml:Z
       - ./stack.yaml:/app/stack.yaml:Z
+      - ./config.yaml:/app/config.yaml:Z
     ports:
       - 8080:8080
 
