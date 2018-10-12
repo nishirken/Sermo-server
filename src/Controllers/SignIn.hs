@@ -36,6 +36,6 @@ signInController authKey dbConn = do
     password <- getParam "password"
     repeatedPassword <- getParam "repeatedPassword"
     validated <- liftIO . runExceptT $ validate dbConn $ SignIn email password repeatedPassword
-    liftIO (setUser dbConn email password)
+    userId <- setUser dbConn email password
     setAuthCookie authKey 2
     redirect "/"
