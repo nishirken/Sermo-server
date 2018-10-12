@@ -27,10 +27,12 @@ verify password passwordHash =
         ((EncryptedPass . encodeUtf8 . toStrict) passwordHash)
 
 validate :: Connection -> Text -> Text -> ExceptT Text IO Int
-validate dbConn email password = ExceptT $ getUserByEmail dbConn email >>= \rows ->
+validate dbConn email password = ExceptT $ do
+    rows <- getUserByEmail dbConn email
     case (rows) of
-        [] -> pure $ Left errorMessage
         [(id, email', password')] -> pure $ if verify password password' then Right id else Left errorMessage
+        [] -> pure $ Left errorMessage
+        _ -> pure $ Left "Internal error"
 
 makeTokenHeader :: Text -> Int -> IO Text
 makeTokenHeader authKey userId = do

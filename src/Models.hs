@@ -6,7 +6,7 @@ data SignIn = SignIn {
     email :: Text
     , password :: Text
     , repeatedPassword :: Text
-    }
+    } deriving (Show)
 
 data FormPageView = FormPageView {
     error :: Text
