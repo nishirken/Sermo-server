@@ -49,7 +49,7 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - hs-auth-example
+    - hs-auth
 
 tests:
   hs-auth-example-test:
@@ -60,6 +60,6 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - hs-auth-example
+    - hs-auth
     - hspec
     - QuickCheck

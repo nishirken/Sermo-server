@@ -1,7 +1,7 @@
 /.idea
-/hs-auth-example.iml
+/hs-auth.iml
 .stack-work/
-hs-auth-example.cabal
+/hs-auth.cabal
 *~
 /cabal.config
 /config.yaml

@@ -13,7 +13,7 @@ getUserByEmail :: Connection -> Text -> IO [(Int, Text, Text)]
 getUserByEmail dbConn email =
     query dbConn "select id, email, password from users where email = ?" (Only email)
 
-setUser :: Connection -> Text -> Text -> IO Int
+setUser :: Connection -> Text -> Text -> IO [Only Int]
 setUser dbConn email password = do
     hash <- encryptPassIO defaultParams (Pass . encodeUtf8 . toStrict $ password)
-    fromIntegral <$> execute dbConn "insert into users (email, password) values (?,?)" (email, getEncryptedPass hash)
+    query dbConn "insert into users (email, password) values (?,?) returning id;" (email, getEncryptedPass hash)

@@ -27,15 +27,22 @@ verify password passwordHash =
         ((EncryptedPass . encodeUtf8 . toStrict) passwordHash)
 
 validate :: Connection -> Text -> Text -> ExceptT Text IO Int
-validate dbConn email password = ExceptT $ getUserByEmail dbConn email >>= \rows ->
+validate dbConn email password = ExceptT $ do
+    rows <- getUserByEmail dbConn email
     case (rows) of
-        [] -> pure $ Left errorMessage
         [(id, email', password')] -> pure $ if verify password password' then Right id else Left errorMessage
+        [] -> pure $ Left errorMessage
+        _ -> pure $ Left "Internal error"
 
 makeTokenHeader :: Text -> Int -> IO Text
 makeTokenHeader authKey userId = do
     token <- createToken authKey $ (pack . show) userId
     pure $ "token=" <> token
+
+setAuthCookie :: Text -> Int -> ActionM ()
+setAuthCookie authKey userId = do
+   token <- liftIO $ makeTokenHeader authKey userId
+   addHeader "Set-Cookie" token
 
 logInController :: Text -> Connection -> ActionM ()
 logInController authKey dbConn = do
@@ -44,7 +51,6 @@ logInController authKey dbConn = do
     validated <- liftIO . runExceptT $ validate dbConn email password
     case (validated) of
         (Right userId) -> do
-            token <- liftIO $ makeTokenHeader authKey userId
-            addHeader "Set-Cookie" token
+            setAuthCookie authKey userId
             redirect "/"
         (Left errorMessage) -> html . renderText $ logInPageView $ FormPageView errorMessage

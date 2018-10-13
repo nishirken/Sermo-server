@@ -1,4 +1,4 @@
-# Simple haskell authorisation example with jwt
+### simple haskell authorisation example with jwt
 
 <pre>docker-compose -p hs-auth up -d --build</pre>
 <pre>docker-compose -p hs-auth exec hs bash</pre>
