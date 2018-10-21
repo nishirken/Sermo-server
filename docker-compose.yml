@@ -1,7 +1,7 @@
 version: '3.2'
 services:
   hs:
-    container_name: hs-auth
+    container_name: sermo
     build:
       context: ./
       dockerfile: Dockerfile

@@ -1,7 +1,7 @@
 /.idea
-/hs-auth.iml
+/Sermo-server.iml
 .stack-work/
-/hs-auth.cabal
+/Sermo-server.cabal
 *~
 /cabal.config
 /config.yaml

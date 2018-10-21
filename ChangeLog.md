@@ -1,3 +1,3 @@
-# Changelog for hs-auth-example
+# Changelog for Sermo-server
 
 ## Unreleased changes
