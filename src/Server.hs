@@ -30,14 +30,14 @@ startServer = do
     config <- decodeFileEither (directory <> "/config.yaml") :: IO (Either ParseException Config)
     case config of
         (Right conf@Config{ appPort }) -> do
-            putStrLn $ "Server started at " <> (show appPort)
+            putStrLn $ "Server started at " <> show appPort
             dbConn <- connectPostgreSQL $ connectionString conf
             prepareDb dbConn >> scotty appPort (routes dbConn conf)
-        (Left configError) -> putStrLn $ show configError
+        (Left configError) -> print configError
 
         where
             connectionString Config{ dbHost, dbPort, dbUser, dbName } = encodeUtf8 . toStrict $
                 "host='" <> dbHost <> "' "
-                <> "port=" <> (pack $ show dbPort) <> " "
+                <> "port=" <> pack (show dbPort) <> " "
                 <> "user='" <> dbUser <> "' "
                 <> "dbname='" <> dbName <> "'"
