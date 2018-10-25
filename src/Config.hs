@@ -3,7 +3,7 @@
 module Config where
 
 import Data.Text.Lazy (Text, toStrict, pack)
-import Data.Yaml (ParseException, FromJSON, Value (Object), parseJSON, (.:))
+import Data.Yaml (FromJSON, Value (Object), parseJSON, (.:))
 import Data.Text.Encoding (encodeUtf8)
 
 data Config = Config {
