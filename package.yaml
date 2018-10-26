@@ -37,6 +37,7 @@ dependencies:
 - yaml
 - directory
 - wai-cors
+- case-insensitive
 
 library:
   source-dirs: src
