@@ -16,7 +16,7 @@ import Control.Monad.IO.Class (liftIO)
 import qualified Db
 import Handlers.Utils (getParam, makeStatus, internalErrorStatus)
 import Handlers.Types (MapError, errorToStatus)
-import Handlers.Auth (createToken)
+import Handlers.Crypt (createToken)
 
 data LogInRequest = LogInRequest {
     email :: TLazy.Text

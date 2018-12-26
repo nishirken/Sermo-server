@@ -3,8 +3,9 @@
 module Config where
 
 import Data.Text.Lazy (Text, toStrict, pack)
-import Data.Yaml (FromJSON, Value (Object), parseJSON, (.:))
+import Data.Yaml (FromJSON, Value (Object), parseJSON, (.:), decodeFileEither, ParseException)
 import Data.Text.Encoding (encodeUtf8)
+import System.Directory (getCurrentDirectory)
 
 data Config = Config {
     dbHost :: Text
@@ -25,3 +26,8 @@ instance FromJSON Config where
         <*> v .: "authKey"
 
     parseJSON invalid = error $ "Can't parse Config from Yaml" <> show invalid
+
+makeConfig :: IO (Either ParseException Config)
+makeConfig = do
+  directory <- getCurrentDirectory
+  decodeFileEither (directory <> "/config.yaml") :: IO (Either ParseException Config)

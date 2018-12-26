@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Handlers.Auth (authMiddleware, createToken) where
+module Handlers.Crypt (authMiddleware, createToken) where
 
 import Control.Monad.IO.Class (liftIO)
 import Data.List (find)

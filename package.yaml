@@ -38,6 +38,7 @@ dependencies:
 - directory
 - wai-cors
 - case-insensitive
+- graphql-api
 
 library:
   source-dirs: src
