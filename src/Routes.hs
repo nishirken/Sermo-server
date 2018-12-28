@@ -37,10 +37,12 @@ data JSONRequest = JSONRequest {
 routes :: Connection -> Config -> IO (ScottyM ())
 routes dbConn Config{ authKey } = do
   JSONRequest { body } <- jsonData :: ActionM JSONRequest
-  middleware static
-  middleware $ cors $ \_ -> Just corsConfig
-  middleware $ authMiddleware authKey
-  post "/login" $ logInHandler authKey dbConn
-  post "/signin" $ signInHandler authKey dbConn
-  post "/graphql" . json <$> testResponse body
-  notFound $ makeStatus 404 "Method not found"
+  graphqlResponse <- testResponse body
+  pure $ do
+    middleware static
+    middleware $ cors $ \_ -> Just corsConfig
+    middleware $ authMiddleware authKey
+    post "/login" $ logInHandler authKey dbConn
+    post "/signin" $ signInHandler authKey dbConn
+    post "/graphql" $ json graphqlResponse
+    notFound $ makeStatus 404 "Method not found"
