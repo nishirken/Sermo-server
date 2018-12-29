@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Db (getUserByEmail, setUser, makeConnection, prepareDb) where
+module Db (getUserCredsByEmail, setUser, makeConnection, prepareDb, getUserById) where
 
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TLazy
@@ -24,18 +24,22 @@ prepareDb conn = do
     conn
     (
       "create table if not exists users " <>
-      "(id serial primary key, email varchar(50) not null, password varchar(500) not null unique);" <>
-      "create table if not exists friends " <>
-      "(user_id primary key, friends_ids int []);"
+      "(id serial primary key, email varchar(50) not null," <>
+      "password varchar(500) not null unique," <>
+      "friends_ids integer [] not null default '{}');"
     )
     ()
   pure conn
 
-getUserByEmail :: Connection -> T.Text -> IO [(Int, T.Text, T.Text)]
-getUserByEmail dbConn email =
-    query dbConn "select id, email, password from users where email = ?" (Only email)
+getUserCredsByEmail :: Connection -> T.Text -> IO [(Int, T.Text, T.Text)]
+getUserCredsByEmail dbConn email =
+  query dbConn "select id, email, password from users where email = ?" (Only email)
 
 setUser :: Connection -> T.Text -> T.Text -> IO [Only Int]
 setUser dbConn email password = do
-    hash <- encryptPassIO defaultParams (Pass . encodeUtf8 $ password)
-    query dbConn "insert into users (email, password) values (?,?) returning id;" (email, getEncryptedPass hash)
+  hash <- encryptPassIO defaultParams (Pass . encodeUtf8 $ password)
+  query dbConn "insert into users (email, password) values (?,?) returning id;" (email, getEncryptedPass hash)
+
+getUserById :: Connection -> Int -> IO [Only T.Text]
+getUserById dbConn userId =
+  query dbConn "select email from users where id=?;" (Only userId)

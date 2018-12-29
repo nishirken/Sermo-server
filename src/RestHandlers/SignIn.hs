@@ -63,7 +63,7 @@ validateEmailLength email =
   if T.length email <= maxEmailLength then Right email else Left EmailLengthIncorrect
 
 validateEmail :: PSQL.Connection -> T.Text -> IO (Either SingInError T.Text)
-validateEmail dbConn email = checkIfEmpty <$> Db.getUserByEmail dbConn email
+validateEmail dbConn email = checkIfEmpty <$> Db.getUserCredsByEmail dbConn email
   where
     checkIfEmpty rows = case length rows of
       0 -> validateEmailLength email

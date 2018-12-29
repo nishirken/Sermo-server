@@ -55,7 +55,7 @@ verify password passwordHash =
 
 validate :: PSQL.Connection -> T.Text -> T.Text -> IO (Either LogInError Int)
 validate dbConn email password = do
-    rows <- Db.getUserByEmail dbConn email
+    rows <- Db.getUserCredsByEmail dbConn email
     case rows of
         [(id, email', password')] ->
             pure $ if verify password password' then Right id else Left IncorrectPassword
