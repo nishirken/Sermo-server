@@ -7,15 +7,15 @@ import Web.Scotty (get, post, html, ScottyM, notFound, middleware, status, json,
 import Network.Wai.Middleware.Static (static)
 import Network.Wai.Middleware.Cors (cors, CorsResourcePolicy (..))
 import Database.PostgreSQL.Simple (Connection)
-import Handlers.LogIn
-import Handlers.SignIn
-import Handlers.Crypt (authMiddleware)
-import Handlers.Utils (makeStatus)
+import RestHandlers.LogIn
+import RestHandlers.SignIn
+import qualified Data.Yaml as Yaml
+import RestHandlers.Utils (makeStatus)
 import Data.Text.Encoding (encodeUtf8)
 import qualified Data.Text as T
 import Data.CaseInsensitive (mk)
 import Config (Config (..))
-import Main.Server (testResponse)
+import Main.Schemas (graphqlHandler)
 import Control.Monad.IO.Class (liftIO)
 
 corsConfig = CorsResourcePolicy {
@@ -29,20 +29,11 @@ corsConfig = CorsResourcePolicy {
   , corsIgnoreFailures = False
 }
 
-data JSONRequest = JSONRequest {
-  token :: T.Text
-  , body :: T.Text
-}
-
-routes :: Connection -> Config -> IO (ScottyM ())
+routes :: Connection -> Config -> ScottyM ()
 routes dbConn Config{ authKey } = do
-  JSONRequest { body } <- jsonData :: ActionM JSONRequest
-  graphqlResponse <- testResponse body
-  pure $ do
-    middleware static
-    middleware $ cors $ \_ -> Just corsConfig
-    middleware $ authMiddleware authKey
-    post "/login" $ logInHandler authKey dbConn
-    post "/signin" $ signInHandler authKey dbConn
-    post "/graphql" $ json graphqlResponse
-    notFound $ makeStatus 404 "Method not found"
+  middleware static
+  middleware $ cors $ \_ -> Just corsConfig
+  post "/login" $ logInHandler authKey dbConn
+  post "/signin" $ signInHandler authKey dbConn
+  post "/graphql" $ graphqlHandler authKey
+  notFound $ makeStatus 404 "Method not found"

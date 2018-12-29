@@ -14,5 +14,4 @@ import Data.Text.Encoding (encodeUtf8)
 startServer :: Config -> Connection -> IO ()
 startServer conf@Config{ appPort } dbConn = do
   putStrLn $ "Server started at " <> show appPort
-  r <- routes dbConn conf
-  scotty appPort r
+  scotty appPort $ routes dbConn conf

@@ -18,7 +18,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-12.25
+resolver: lts-13.0
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -41,6 +41,7 @@ packages:
 extra-deps:
 extra-deps:
 - graphql-api-0.3.0
+- jwt-0.7.2
 
 
 # Override default flag values for local packages and extra-deps

@@ -2,30 +2,31 @@
 
 module Config where
 
-import Data.Text.Lazy (Text, toStrict, pack)
+import qualified Data.Text as T
+import Data.Text.Lazy (toStrict)
 import Data.Yaml (FromJSON, Value (Object), parseJSON, (.:), decodeFileEither, ParseException)
 import Data.Text.Encoding (encodeUtf8)
 import System.Directory (getCurrentDirectory)
 
 data Config = Config {
-    dbHost :: Text
-    , dbPort :: Int
-    , dbUser :: Text
-    , dbName :: Text
-    , appPort :: Int
-    , authKey :: Text
+  dbHost :: T.Text
+  , dbPort :: Int
+  , dbUser :: T.Text
+  , dbName :: T.Text
+  , appPort :: Int
+  , authKey :: T.Text
 }
 
 instance FromJSON Config where
-    parseJSON (Object v) = Config
-        <$> v .: "dbHost"
-        <*> v .: "dbPort"
-        <*> v .: "dbUser"
-        <*> v .: "dbName"
-        <*> v .: "appPort"
-        <*> v .: "authKey"
+  parseJSON (Object v) = Config
+    <$> v .: "dbHost"
+    <*> v .: "dbPort"
+    <*> v .: "dbUser"
+    <*> v .: "dbName"
+    <*> v .: "appPort"
+    <*> v .: "authKey"
 
-    parseJSON invalid = error $ "Can't parse Config from Yaml" <> show invalid
+  parseJSON invalid = error $ "Can't parse Config from Yaml" <> show invalid
 
 makeConfig :: IO (Either ParseException Config)
 makeConfig = do

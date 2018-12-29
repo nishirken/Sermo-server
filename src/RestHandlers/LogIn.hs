@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Handlers.LogIn where
+module RestHandlers.LogIn where
 
-import qualified Data.Text.Lazy as TLazy
+import qualified Data.Text as T
 import qualified Data.Text.Encoding as TEncoding
 import qualified Web.Scotty as Scotty
 import qualified Database.PostgreSQL.Simple as PSQL
@@ -14,13 +14,13 @@ import Data.Either (either)
 import Control.Monad.IO.Class (liftIO)
 
 import qualified Db
-import Handlers.Utils (getParam, makeStatus, internalErrorStatus)
-import Handlers.Types (MapError, errorToStatus)
-import Handlers.Crypt (createToken)
+import RestHandlers.Utils (getParam, makeStatus, internalErrorStatus)
+import RestHandlers.Types (MapError, errorToStatus)
+import RestHandlers.Auth (createToken)
 
 data LogInRequest = LogInRequest {
-    email :: TLazy.Text
-    , password :: TLazy.Text
+    email :: T.Text
+    , password :: T.Text
 }
 
 instance Yaml.FromJSON LogInRequest where
@@ -28,7 +28,7 @@ instance Yaml.FromJSON LogInRequest where
         <$> v .: "email"
         <*> v .: "password"
 
-newtype LogInResponse = LogInResponse { token :: TLazy.Text }
+newtype LogInResponse = LogInResponse { token :: T.Text }
 
 instance Yaml.ToJSON LogInResponse where
     toJSON (LogInResponse token) = Yaml.object ["token" .= token]
@@ -46,14 +46,14 @@ instance MapError LogInError where
     errorToStatus IncorrectEmail = badCredsStatus
     errorToStatus _ = internalErrorStatus
 
-verify :: TLazy.Text -> TLazy.Text -> Bool
+verify :: T.Text -> T.Text -> Bool
 verify password passwordHash =
     fst $ Crypto.verifyPass
         Crypto.defaultParams
-        ((Crypto.Pass . TEncoding.encodeUtf8 . TLazy.toStrict) password)
-        ((Crypto.EncryptedPass . TEncoding.encodeUtf8 . TLazy.toStrict) passwordHash)
+        ((Crypto.Pass . TEncoding.encodeUtf8) password)
+        ((Crypto.EncryptedPass . TEncoding.encodeUtf8) passwordHash)
 
-validate :: PSQL.Connection -> TLazy.Text -> TLazy.Text -> IO (Either LogInError Int)
+validate :: PSQL.Connection -> T.Text -> T.Text -> IO (Either LogInError Int)
 validate dbConn email password = do
     rows <- Db.getUserByEmail dbConn email
     case rows of
@@ -62,12 +62,12 @@ validate dbConn email password = do
         [] -> pure $ Left IncorrectEmail
         _ -> pure $ Left InternalError
 
-logInHandler :: TLazy.Text -> PSQL.Connection -> Scotty.ActionM ()
+logInHandler :: T.Text -> PSQL.Connection -> Scotty.ActionM ()
 logInHandler authKey dbConn = do
     LogInRequest { email, password } <- Scotty.jsonData :: Scotty.ActionM LogInRequest
     validated <- liftIO $ validate dbConn email password
     case validated of
         (Right userId) -> do
-            token <- liftIO $ createToken authKey $ (TLazy.pack . show) userId
+            token <- liftIO $ createToken authKey $ (T.pack . show) userId
             Scotty.json $ LogInResponse token
         (Left err) -> errorToStatus err
