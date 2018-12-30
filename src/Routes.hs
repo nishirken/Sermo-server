@@ -35,5 +35,5 @@ routes dbConn Config{ authKey } = do
   middleware $ cors $ \_ -> Just corsConfig
   post "/login" $ logInHandler authKey dbConn
   post "/signin" $ signInHandler authKey dbConn
-  post "/graphql" $ graphqlHandler authKey
+  post "/graphql" $ graphqlHandler dbConn authKey
   notFound $ makeStatus 404 "Method not found"
