@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Db (getUserCredsByEmail, setUser, makeConnection, prepareDb, getUserById) where
+module Db where
 
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TLazy
@@ -40,6 +40,9 @@ setUser dbConn email password = do
   hash <- encryptPassIO defaultParams (Pass . encodeUtf8 $ password)
   query dbConn "insert into users (email, password) values (?,?) returning id;" (email, getEncryptedPass hash)
 
-getUserById :: Connection -> Int -> IO [Only T.Text]
-getUserById dbConn userId =
-  query dbConn "select email from users where id=?;" (Only userId)
+getUserById :: Connection -> Int -> IO [(T.Text, T.Text)]
+getUserById dbConn userId = query
+  dbConn
+  ("select u1.email, u2.email from " <>
+  "(users as u1 inner join users as u2 on u2.id=any(u1.friends_ids)) where u1.id=?;")
+  (Only userId)

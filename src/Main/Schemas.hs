@@ -16,7 +16,7 @@ import Web.Scotty (ActionM, status, jsonData, json)
 import RestHandlers.Auth (verifiedToken)
 import Control.Monad.IO.Class (liftIO)
 import Database.PostgreSQL.Simple (Connection, Only (..))
-import Db (getUserById)
+import qualified Db
 
 type User = Object "User" '[]
   '[ Argument "id" T.Text :> Field "user" T.Text ]
@@ -24,9 +24,8 @@ type User = Object "User" '[]
 userHandler :: Connection -> Handler IO User
 userHandler dbConn =
   pure $ \userId -> do
-    resp <- getUserById dbConn (read @Int (T.unpack userId))
-    case head resp of
-      (Only user) -> pure user
+    userResult <- Db.getUserById dbConn (read @Int (T.unpack userId))
+    pure $ (fst . head) userResult
 
 queryHandler :: Connection -> T.Text -> IO Response
 queryHandler dbConn = interpretAnonymousQuery @User $ userHandler dbConn
