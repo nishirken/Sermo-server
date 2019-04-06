@@ -1,22 +1,38 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE NamedFieldPuns #-}
+
 module RestHandlers.Utils where
 
-import qualified Data.Text as T
-import Data.Text.Lazy (toStrict, fromStrict)
-import Data.Text.Encoding (encodeUtf8)
-import Web.Scotty (ActionM, status, param, rescue, json)
-import Network.HTTP.Types (mkStatus, status500)
-import RestHandlers.Types (SuccessResponse (..))
+import RestHandlers.Types (JSONResponse (..), JSONError (..), SuccessResponse (..))
+import qualified Data.Yaml as Yaml
+import Data.Yaml ((.=))
+import qualified Data.Text as Text
+import qualified Web.Scotty as Scotty
+    
+instance Yaml.ToJSON JSONError where
+    toJSON JSONError { code, message } = Yaml.object
+        [ "code" .= Yaml.toJSON code
+        , "message" .= Yaml.toJSON message
+        ]
 
-getParam :: T.Text -> ActionM T.Text
-getParam paramName =
-    param (fromStrict paramName) `rescue` \errorMessage -> return $ toStrict errorMessage
+instance Yaml.ToJSON a => Yaml.ToJSON (JSONResponse a) where
+    toJSON JSONResponse { _data, _error } = Yaml.object
+        [ "data" .= Yaml.toJSON _data
+        , "error" .= Yaml.toJSON _error
+        ]
 
-makeStatus :: Int -> T.Text -> ActionM ()
-makeStatus code message =
-    status $ mkStatus code $ encodeUtf8 message
+instance Yaml.ToJSON SuccessResponse where
+    toJSON x = Yaml.object [ "success" .= Yaml.toJSON x ]
 
-internalErrorStatus :: ActionM ()
-internalErrorStatus = status status500
+makeDataResponse :: Yaml.ToJSON a => a -> Scotty.ActionM ()
+makeDataResponse x = Scotty.json . Yaml.toJSON $ JSONResponse (Just x) Nothing
 
-successResponse :: ActionM ()
-successResponse = json $ SuccessResponse True
+makeErrorResponse :: Int -> Maybe Text.Text -> Scotty.ActionM ()
+makeErrorResponse code message =
+    Scotty.json . Yaml.toJSON $ JSONResponse (Nothing :: Maybe Int) $ Just (JSONError code message)
+
+makeSuccessResponse :: Scotty.ActionM ()
+makeSuccessResponse = makeDataResponse $ SuccessResponse True
+
+makeInternalErrorResponse :: Scotty.ActionM ()
+makeInternalErrorResponse = makeErrorResponse 500 $ Just "Internal error"

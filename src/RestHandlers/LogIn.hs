@@ -14,14 +14,13 @@ import Data.Either (either)
 import Control.Monad.IO.Class (liftIO)
 
 import qualified Db
-import RestHandlers.Utils (getParam, makeStatus, internalErrorStatus)
-import RestHandlers.Types (MapError, errorToStatus)
+import qualified RestHandlers.Utils as Utils
 import RestHandlers.Auth (createToken)
 
-data LogInRequest = LogInRequest {
-    email :: T.Text
+data LogInRequest = LogInRequest
+    { email :: T.Text
     , password :: T.Text
-}
+    }
 
 instance Yaml.FromJSON LogInRequest where
     parseJSON (Yaml.Object v) = LogInRequest
@@ -39,12 +38,12 @@ data LogInError =
     | InternalError
     deriving (Eq)
 
-badCredsStatus = makeStatus 422 "Incorrect password or email"
+badCredsStatus = Utils.makeErrorResponse 422 $ Just "Incorrect password or email"
 
-instance MapError LogInError where
-    errorToStatus IncorrectPassword = badCredsStatus
-    errorToStatus IncorrectEmail = badCredsStatus
-    errorToStatus _ = internalErrorStatus
+errorToStatus :: LogInError -> Scotty.ActionM ()
+errorToStatus IncorrectPassword = badCredsStatus
+errorToStatus IncorrectEmail = badCredsStatus
+errorToStatus _ = Utils.makeInternalErrorResponse
 
 verify :: T.Text -> T.Text -> Bool
 verify password passwordHash =
@@ -69,5 +68,5 @@ logInHandler authKey dbConn = do
     case validated of
         (Right userId) -> do
             token <- liftIO $ createToken authKey $ (T.pack . show) userId
-            Scotty.json $ LogInResponse token
+            Utils.makeDataResponse $ LogInResponse token
         (Left err) -> errorToStatus err

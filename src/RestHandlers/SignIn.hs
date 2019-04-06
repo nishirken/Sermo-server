@@ -10,33 +10,25 @@ import qualified Network.HTTP.Types as NetworkTypes
 import qualified Data.Yaml as Yaml
 import Data.Yaml ((.:))
 import Control.Monad.IO.Class (liftIO)
-
+import qualified RestHandlers.Utils as Utils
 import qualified Db
-import RestHandlers.Utils (makeStatus, internalErrorStatus, successResponse)
-import RestHandlers.Types (MapError, errorToStatus)
 
-data SignInRequest = SignInRequest {
-  email :: T.Text
+data SignInRequest = SignInRequest
+  { email :: T.Text
   , password :: T.Text
-}
+  }
 
 instance Yaml.FromJSON SignInRequest where
   parseJSON (Yaml.Object v) = SignInRequest
     <$> v .: "email"
     <*> v .: "password"
 
-data SingInError =
+data SignInError =
   EmailAlreadyExists
   | EmailLengthIncorrect
   | PasswordLengthIncorrect
   | InternalError
   deriving (Eq)
-
-instance MapError SingInError where
-  errorToStatus EmailAlreadyExists = makeStatus 422 "Email already exists"
-  errorToStatus EmailLengthIncorrect = makeStatus 422 emailErrorMessage
-  errorToStatus PasswordLengthIncorrect = makeStatus 422 passwordLengthErrorMessage
-  errorToStatus _ = internalErrorStatus
 
 minPasswordLength = 6
 maxPasswordLength = 20
@@ -51,25 +43,31 @@ maxEmailLength = 50
 
 emailErrorMessage = T.pack $ "Email length incorrect, max length is " <> show maxEmailLength
 
-validatePasswordLength :: T.Text -> Either SingInError T.Text
+errorToStatus :: SignInError -> Scotty.ActionM ()  
+errorToStatus EmailAlreadyExists = Utils.makeErrorResponse 422 $ Just "Email already exists"
+errorToStatus EmailLengthIncorrect = Utils.makeErrorResponse 422 $ Just emailErrorMessage
+errorToStatus PasswordLengthIncorrect = Utils.makeErrorResponse 422 $ Just passwordLengthErrorMessage
+errorToStatus InternalError = Utils.makeInternalErrorResponse
+
+validatePasswordLength :: T.Text -> Either SignInError T.Text
 validatePasswordLength password =
   if minPasswordLength <= l && l <= maxPasswordLength
   then Right password
   else Left PasswordLengthIncorrect
     where l = T.length password
 
-validateEmailLength :: T.Text -> Either SingInError T.Text
+validateEmailLength :: T.Text -> Either SignInError T.Text
 validateEmailLength email =
   if T.length email <= maxEmailLength then Right email else Left EmailLengthIncorrect
 
-validateEmail :: PSQL.Connection -> T.Text -> IO (Either SingInError T.Text)
+validateEmail :: PSQL.Connection -> T.Text -> IO (Either SignInError T.Text)
 validateEmail dbConn email = checkIfEmpty <$> Db.getUserCredsByEmail dbConn email
   where
     checkIfEmpty rows = case length rows of
       0 -> validateEmailLength email
       _ -> Left EmailAlreadyExists
 
-validate :: PSQL.Connection -> SignInRequest -> IO (Either SingInError SignInRequest)
+validate :: PSQL.Connection -> SignInRequest -> IO (Either SignInError SignInRequest)
 validate dbConn (SignInRequest email' password') = do
   validatedEmailEither <- validateEmail dbConn email'
   pure $ do
@@ -85,6 +83,6 @@ signInHandler authKey dbConn = do
     (Right SignInRequest { email, password }) -> do
       userId <- liftIO $ Db.setUser dbConn email password
       case userId of
-        [x] -> successResponse
-        _ -> internalErrorStatus
+        [x] -> Utils.makeSuccessResponse
+        _ -> Utils.makeInternalErrorResponse
     (Left err) -> errorToStatus err

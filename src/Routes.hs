@@ -10,7 +10,7 @@ import Database.PostgreSQL.Simple (Connection)
 import RestHandlers.LogIn
 import RestHandlers.SignIn
 import qualified Data.Yaml as Yaml
-import RestHandlers.Utils (makeStatus)
+import qualified RestHandlers.Utils as Utils
 import Data.Text.Encoding (encodeUtf8)
 import qualified Data.Text as T
 import Data.CaseInsensitive (mk)
@@ -36,4 +36,4 @@ routes dbConn Config{ authKey } = do
   post "/login" $ logInHandler authKey dbConn
   post "/signin" $ signInHandler authKey dbConn
   post "/graphql" $ graphqlHandler dbConn authKey
-  notFound $ makeStatus 404 "Method not found"
+  notFound $ Utils.makeErrorResponse 404 $ Just "Method not found"
