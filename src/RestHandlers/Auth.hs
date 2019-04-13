@@ -2,7 +2,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
 module
-RestHandlers.Auth (verifiedToken, createToken) where
+RestHandlers.Auth (verifiedToken, createToken, isAuthorizedHandler) where
 
 import Data.List (find)
 import Data.Maybe (maybe)
@@ -72,8 +72,8 @@ instance Yaml.FromJSON IsAuthorizedRequest where
   parseJSON (Yaml.Object v) = IsAuthorizedRequest
     <$> v .: "token"
 
-isAuthorisedHandler :: T.Text -> PSQL.Connection -> ActionM ()
-isAuthorisedHandler authKey conn = do
+isAuthorizedHandler :: T.Text -> PSQL.Connection -> ActionM ()
+isAuthorizedHandler authKey conn = do
   IsAuthorizedRequest { _token } <- jsonData :: ActionM IsAuthorizedRequest
   case verifiedToken authKey _token of
     (Just _) -> boolResp True

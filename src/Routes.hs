@@ -9,6 +9,7 @@ import Network.Wai.Middleware.Cors (cors, CorsResourcePolicy (..))
 import Database.PostgreSQL.Simple (Connection)
 import RestHandlers.LogIn
 import RestHandlers.SignIn
+import RestHandlers.Auth (isAuthorizedHandler)
 import qualified Data.Yaml as Yaml
 import qualified RestHandlers.Utils as Utils
 import Data.Text.Encoding (encodeUtf8)
@@ -36,4 +37,5 @@ routes dbConn Config{ authKey } = do
   post "/login" $ logInHandler authKey dbConn
   post "/signin" $ signInHandler authKey dbConn
   post "/graphql" $ graphqlHandler dbConn authKey
+  post "/auth" $ isAuthorizedHandler authKey dbConn
   notFound $ Utils.makeErrorResponse 404 $ Just "Method not found"
