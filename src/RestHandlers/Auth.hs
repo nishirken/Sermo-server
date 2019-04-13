@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module RestHandlers.Auth (verifiedToken, createToken) where
+module
+RestHandlers.Auth (verifiedToken, createToken) where
 
 import Data.List (find)
 import Data.Maybe (maybe)
@@ -28,13 +29,19 @@ import Web.JWT (
     , jti
     , nbf
     , JSON
+    , decode
     )
 import Network.Wai (Middleware, mapResponseHeaders, mapResponseStatus)
 import Network.Wai.Internal (Request (..), Response (..))
 import Network.HTTP.Types (status401)
-import RestHandlers.Types (TokenRequest (..))
+import RestHandlers.Types (TokenRequest (..), SuccessResponse (..))
 import Web.Scotty (ActionM, jsonData)
 import Control.Monad.IO.Class (liftIO)
+import qualified Database.PostgreSQL.Simple as PSQL
+import qualified Data.Yaml as Yaml
+import Data.Yaml ((.:))
+import qualified RestHandlers.Utils as Utils
+import qualified Db
 
 expirationTime :: IO NominalDiffTime
 expirationTime = utcTimeToPOSIXSeconds . addUTCTime (60 * 60 :: NominalDiffTime) <$> getCurrentTime
@@ -58,3 +65,17 @@ checkExpired claimsSet@JWTClaimsSet{ nbf } =
 
 verifiedToken :: T.Text -> T.Text -> Maybe (JWT VerifiedJWT)
 verifiedToken key = decodeAndVerifySignature $ secret key
+
+newtype IsAuthorizedRequest = IsAuthorizedRequest { _token :: T.Text }
+
+instance Yaml.FromJSON IsAuthorizedRequest where
+  parseJSON (Yaml.Object v) = IsAuthorizedRequest
+    <$> v .: "token"
+
+isAuthorisedHandler :: T.Text -> PSQL.Connection -> ActionM ()
+isAuthorisedHandler authKey conn = do
+  IsAuthorizedRequest { _token } <- jsonData :: ActionM IsAuthorizedRequest
+  case verifiedToken authKey _token of
+    (Just _) -> boolResp True
+    Nothing -> boolResp False
+    where boolResp x = Utils.makeDataResponse $ SuccessResponse x
