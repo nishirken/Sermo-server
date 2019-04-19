@@ -13,7 +13,7 @@ import GraphQL.Resolver (Handler)
 import RestHandlers.Types (TokenRequest (..))
 import Network.HTTP.Types (status401)
 import Web.Scotty (ActionM, status, jsonData, json)
-import RestHandlers.Auth (verifiedToken)
+import RestHandlers.Auth (isTokenValid)
 import Control.Monad.IO.Class (liftIO)
 import Database.PostgreSQL.Simple (Connection, Only (..))
 import qualified Db
@@ -33,6 +33,6 @@ queryHandler dbConn = interpretAnonymousQuery @User $ userHandler dbConn
 graphqlHandler :: Connection -> T.Text -> ActionM ()
 graphqlHandler dbConn authKey = do
   TokenRequest { body, token } <- jsonData :: ActionM TokenRequest
-  case verifiedToken authKey token of
-    (Just _) -> liftIO (queryHandler dbConn body) >>= json
-    Nothing -> status status401
+  if isTokenValid authKey token then
+    liftIO (queryHandler dbConn body) >>= json else
+    status status401

@@ -1,7 +1,5 @@
-import ValidationSpec
-
 import Test.Hspec (hspec)
+import Rest.LogInSpec (logInSpec)
 
 main :: IO ()
-main = hspec $ do
-    validationSpec
+main = hspec logInSpec

@@ -2,7 +2,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
 module
-RestHandlers.Auth (verifiedToken, createToken, isAuthorizedHandler) where
+RestHandlers.Auth (isTokenValid, createToken, isAuthorizedHandler) where
 
 import Data.List (find)
 import Data.Maybe (maybe)
@@ -63,8 +63,10 @@ checkExpired claimsSet@JWTClaimsSet{ nbf } =
       pure $ if diffTime > 0 then Just claimsSet else Nothing
     Nothing -> pure Nothing
 
-verifiedToken :: T.Text -> T.Text -> Maybe (JWT VerifiedJWT)
-verifiedToken key = decodeAndVerifySignature $ secret key
+isTokenValid :: T.Text -> T.Text -> Bool
+isTokenValid key token = case decodeAndVerifySignature (secret key) token of
+  (Just _) -> True
+  Nothing -> False
 
 newtype IsAuthorizedRequest = IsAuthorizedRequest { _token :: T.Text }
 
@@ -75,7 +77,4 @@ instance Yaml.FromJSON IsAuthorizedRequest where
 isAuthorizedHandler :: T.Text -> PSQL.Connection -> ActionM ()
 isAuthorizedHandler authKey conn = do
   IsAuthorizedRequest { _token } <- jsonData :: ActionM IsAuthorizedRequest
-  case verifiedToken authKey _token of
-    (Just _) -> boolResp True
-    Nothing -> boolResp False
-    where boolResp x = Utils.makeDataResponse $ SuccessResponse x
+  Utils.makeDataResponse $ SuccessResponse (isTokenValid authKey _token)
