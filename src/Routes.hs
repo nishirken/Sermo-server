@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Routes (routes) where
+module Routes (routes, middlewares) where
 
 import Web.Scotty (get, post, html, ScottyM, notFound, middleware, status, json, jsonData, ActionM)
 import Network.Wai.Middleware.Static (static)
@@ -30,10 +30,13 @@ corsConfig = CorsResourcePolicy {
   , corsIgnoreFailures = False
 }
 
-routes :: Connection -> Config -> ScottyM ()
-routes dbConn Config{ authKey } = do
+middlewares :: ScottyM ()
+middlewares = do
   middleware static
   middleware $ cors $ \_ -> Just corsConfig
+
+routes :: Connection -> Config -> ScottyM ()
+routes dbConn Config{ authKey } = do
   post "/login" $ logInHandler authKey dbConn
   post "/signin" $ signInHandler authKey dbConn
   post "/graphql" $ graphqlHandler dbConn authKey

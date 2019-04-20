@@ -14,8 +14,12 @@ services:
       - ./package.yaml:/app/package.yaml:Z
       - ./stack.yaml:/app/stack.yaml:Z
       - ./config.yaml:/app/config.yaml:Z
+      - ./test-config.yaml:/app/test-config.yaml:Z
     ports:
       - 8080:8080
 
   psql:
+    image: postgres:11
+
+  test-psql:
     image: postgres:11

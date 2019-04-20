@@ -31,8 +31,13 @@ prepareDb conn = do
     ()
   pure conn
 
+clearDb :: Connection -> IO Connection
+clearDb conn = do
+  execute conn "truncate users;" ()
+  pure conn
+
 getUserCredsByEmail :: Connection -> T.Text -> IO [(Int, T.Text, T.Text)]
-getUserCredsByEmail dbConn email =
+getUserCredsByEmail dbConn email = do
   query dbConn "select id, email, password from users where email = ?" (Only email)
 
 setUser :: Connection -> T.Text -> T.Text -> IO [Only Int]

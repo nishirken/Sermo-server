@@ -1,12 +1,12 @@
 module Main where
 
 import Server (startServer)
-import Config (makeConfig)
+import Config (makeAppConfig)
 import Db (makeConnection, prepareDb)
 
 main :: IO ()
 main = do
-  config <- makeConfig
+  config <- makeAppConfig
   case config of
     (Right conf) -> do
       connection <- makeConnection conf

@@ -65,4 +65,9 @@ tests:
     dependencies:
     - Sermo-server
     - hspec
+    - hspec-wai
+    - hspec-wai-json
+    - regex-compat
+    - wai-extra
+    - bytestring
     - QuickCheck
