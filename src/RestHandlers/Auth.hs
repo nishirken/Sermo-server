@@ -25,6 +25,7 @@ import Web.JWT (
     , secondsSinceEpoch
     , secret
     , stringOrURI
+    , stringOrURIToText
     , iss
     , jti
     , nbf
@@ -42,6 +43,8 @@ import qualified Data.Yaml as Yaml
 import Data.Yaml ((.:))
 import qualified RestHandlers.Utils as Utils
 import qualified Db
+import Data.Either.Combinators (rightToMaybe)
+import Data.Text.Read (decimal)
 
 expirationTime :: IO NominalDiffTime
 expirationTime = utcTimeToPOSIXSeconds . addUTCTime (60 * 60 :: NominalDiffTime) <$> getCurrentTime
@@ -55,18 +58,32 @@ createToken secretKey userId = do
     , nbf = numericDate expiration
   }
 
-checkExpired :: JWTClaimsSet -> IO (Maybe JWTClaimsSet)
-checkExpired claimsSet@JWTClaimsSet{ nbf } =
+isTokenIdValid :: JWT VerifiedJWT -> PSQL.Connection -> IO Bool
+isTokenIdValid token conn = let JWTClaimsSet { jti } = claims token in case (do
+  encodedJti <- jti
+  intJti <- rightToMaybe $ (decimal . stringOrURIToText) encodedJti
+  pure intJti) of
+    (Just parsedIntJti) -> do
+      rows <- Db.getUserById conn (fst parsedIntJti)
+      pure $ length rows /= 0
+    Nothing -> pure False
+
+isTokenTimeValid :: JWT VerifiedJWT -> IO Bool
+isTokenTimeValid token = let JWTClaimsSet { nbf } = claims token in
   case nbf of
     (Just expiredTime) -> do
       diffTime <- diffUTCTime ((posixSecondsToUTCTime . secondsSinceEpoch) expiredTime) <$> getCurrentTime
-      pure $ if diffTime > 0 then Just claimsSet else Nothing
-    Nothing -> pure Nothing
+      pure $ diffTime > 0
+    Nothing -> pure False
 
-isTokenValid :: T.Text -> T.Text -> Bool
-isTokenValid key token = case decodeAndVerifySignature (secret key) token of
-  (Just _) -> True
-  Nothing -> False
+isTokenValid :: T.Text -> T.Text -> PSQL.Connection -> IO Bool
+isTokenValid authKey token dbConn =
+  case decodeAndVerifySignature (secret authKey) token of
+    (Just verified) -> do
+      idRes <- isTokenIdValid verified dbConn
+      expiredRes <- isTokenTimeValid verified
+      pure $ idRes && expiredRes
+    Nothing -> pure False
 
 newtype IsAuthorizedRequest = IsAuthorizedRequest { _token :: T.Text }
 
@@ -77,4 +94,5 @@ instance Yaml.FromJSON IsAuthorizedRequest where
 isAuthorizedHandler :: T.Text -> PSQL.Connection -> ActionM ()
 isAuthorizedHandler authKey conn = do
   IsAuthorizedRequest { _token } <- jsonData :: ActionM IsAuthorizedRequest
-  Utils.makeDataResponse $ SuccessResponse (isTokenValid authKey _token)
+  isValid <- liftIO $ isTokenValid authKey _token conn
+  Utils.makeDataResponse $ SuccessResponse isValid

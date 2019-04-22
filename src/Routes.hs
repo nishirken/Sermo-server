@@ -39,6 +39,6 @@ routes :: Connection -> Config -> ScottyM ()
 routes dbConn Config{ authKey } = do
   post "/login" $ logInHandler authKey dbConn
   post "/signin" $ signInHandler authKey dbConn
-  post "/graphql" $ graphqlHandler dbConn authKey
+  post "/graphql" $ graphqlHandler authKey dbConn
   post "/auth" $ isAuthorizedHandler authKey dbConn
   notFound $ Utils.makeErrorResponse 404 $ Just "Method not found"

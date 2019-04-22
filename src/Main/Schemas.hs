@@ -30,9 +30,8 @@ userHandler dbConn =
 queryHandler :: Connection -> T.Text -> IO Response
 queryHandler dbConn = interpretAnonymousQuery @User $ userHandler dbConn
 
-graphqlHandler :: Connection -> T.Text -> ActionM ()
-graphqlHandler dbConn authKey = do
+graphqlHandler :: T.Text -> Connection -> ActionM ()
+graphqlHandler authKey dbConn = do
   TokenRequest { body, token } <- jsonData :: ActionM TokenRequest
-  if isTokenValid authKey token then
-    liftIO (queryHandler dbConn body) >>= json else
-    status status401
+  isValid <- liftIO $ isTokenValid authKey token dbConn
+  if isValid then liftIO (queryHandler dbConn body) >>= json else status status401
