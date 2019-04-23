@@ -21,14 +21,11 @@ testToken = ""
 preparation :: IO (Application, Connection)
 preparation = do
   config <- makeTestConfig
-  case config of
-    (Right conf) -> do
-      connection <- makeConnection conf
-      prepareDb connection
-      clearDb connection
-      app <- Scotty.scottyApp $ routes connection conf
-      pure $ (app, connection)
-    (Left configError) -> error $ show configError
+  connection <- makeConnection config
+  prepareDb connection
+  clearDb connection
+  app <- Scotty.scottyApp $ routes connection config
+  pure $ (app, connection)
 
 logInPreparation :: IO Application
 logInPreparation = do

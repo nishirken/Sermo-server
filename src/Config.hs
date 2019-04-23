@@ -28,10 +28,13 @@ instance FromJSON Config where
 
   parseJSON invalid = error $ "Can't parse Config from Yaml" <> show invalid
 
-makeConfig :: String -> IO (Either ParseException Config)
+makeConfig :: String -> IO Config
 makeConfig configPath = do
   directory <- getCurrentDirectory
-  decodeFileEither (directory <> configPath) :: IO (Either ParseException Config)
+  config <- decodeFileEither (directory <> configPath) :: IO (Either ParseException Config)
+  case config of
+    (Right conf) -> pure conf
+    (Left configError) -> error $ show configError
 
 makeAppConfig = makeConfig "/config.yaml"
 makeTestConfig = makeConfig "/test-config.yaml"
