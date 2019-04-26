@@ -7,6 +7,7 @@ import Db (makeConnection, prepareDb, clearDb, setUser)
 import Routes (routes)
 import Config (makeTestConfig, Config (..))
 import Network.Wai.Test (SResponse (..))
+import Test.Hspec.Wai.Matcher (ResponseMatcher (..))
 import Network.Wai (Application, responseLBS)
 import Network.HTTP.Types (status200)
 import qualified Web.Scotty as Scotty
@@ -37,3 +38,7 @@ logInPreparation = do
 withMockedToken :: SResponse -> SResponse
 withMockedToken SResponse{ simpleStatus, simpleHeaders, simpleBody } = SResponse simpleStatus simpleHeaders newBody
   where newBody = BS.pack $ Regex.subRegex (Regex.mkRegex "\"token\":\".*?\"") (BS.unpack simpleBody) "\"token\":\"mock\"},\"error\""
+
+replaceToken :: Text.Text -> BS.ByteString -> BS.ByteString
+replaceToken token rawJson =
+  BS.pack $ Regex.subRegex (Regex.mkRegex "\\$token") (BS.unpack rawJson) (Text.unpack token)

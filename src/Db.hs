@@ -37,7 +37,7 @@ clearDb conn = do
   pure conn
 
 getUserCredsByEmail :: Connection -> T.Text -> IO [(Int, T.Text, T.Text)]
-getUserCredsByEmail dbConn email = do
+getUserCredsByEmail dbConn email =
   query dbConn "select id, email, password from users where email = ?" (Only email)
 
 setUser :: Connection -> T.Text -> T.Text -> IO [Only Int]
