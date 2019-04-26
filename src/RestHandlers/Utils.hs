@@ -24,6 +24,11 @@ instance Yaml.ToJSON a => Yaml.ToJSON (JSONResponse a) where
 instance Yaml.ToJSON SuccessResponse where
   toJSON SuccessResponse { success } = Yaml.object [ "success" .= Yaml.toJSON success ]
 
+newtype TokenResponse = TokenResponse { token :: Text.Text }
+
+instance Yaml.ToJSON TokenResponse where
+    toJSON (TokenResponse token) = Yaml.object ["token" .= token]
+
 makeDataResponse :: Yaml.ToJSON a => a -> Scotty.ActionM ()
 makeDataResponse x = Scotty.json . Yaml.toJSON $ JSONResponse (Just x) Nothing
 

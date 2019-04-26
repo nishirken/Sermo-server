@@ -27,11 +27,6 @@ instance Yaml.FromJSON LogInRequest where
         <$> v .: "email"
         <*> v .: "password"
 
-newtype LogInResponse = LogInResponse { token :: T.Text }
-
-instance Yaml.ToJSON LogInResponse where
-    toJSON (LogInResponse token) = Yaml.object ["token" .= token]
-
 data LogInError =
     IncorrectPassword
     | IncorrectEmail
@@ -68,5 +63,5 @@ logInHandler authKey dbConn = do
     case validated of
         (Right userId) -> do
             token <- liftIO $ createToken authKey $ (T.pack . show) userId
-            Utils.makeDataResponse $ LogInResponse token
+            Utils.makeDataResponse $ Utils.TokenResponse token
         (Left err) -> errorToStatus err

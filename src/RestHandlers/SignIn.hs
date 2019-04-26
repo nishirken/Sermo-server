@@ -12,6 +12,7 @@ import Data.Yaml ((.:))
 import Control.Monad.IO.Class (liftIO)
 import qualified RestHandlers.Utils as Utils
 import qualified Db
+import qualified RestHandlers.Auth as Auth
 
 data SignInRequest = SignInRequest
   { email :: T.Text
@@ -83,6 +84,8 @@ signInHandler authKey dbConn = do
     (Right SignInRequest { email, password }) -> do
       userId <- liftIO $ Db.setUser dbConn email password
       case userId of
-        [x] -> Utils.makeSuccessResponse
+        [x] -> do
+          token <- liftIO $ Auth.createToken authKey $ (T.pack . show) x
+          Utils.makeDataResponse $ Utils.TokenResponse token
         _ -> Utils.makeInternalErrorResponse
     (Left err) -> errorToStatus err
