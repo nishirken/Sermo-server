@@ -40,6 +40,8 @@ dependencies:
 - case-insensitive
 - graphql-api
 - either
+- template-haskell
+- regex-compat
 
 library:
   source-dirs: src

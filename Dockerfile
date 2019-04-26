@@ -1,4 +1,4 @@
-FROM haskell:8.6.2
+FROM haskell:8.6.3
 LABEL name="haskell"
 LABEL version="8.6.3"
 WORKDIR /app
