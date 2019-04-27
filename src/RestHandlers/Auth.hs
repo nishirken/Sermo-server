@@ -20,6 +20,7 @@ import Web.JWT (
     , VerifiedJWT
     , Signature
     , NumericDate
+    , StringOrURI
     , encodeSigned
     , numericDate
     , secondsSinceEpoch
@@ -47,7 +48,7 @@ import Data.Either.Combinators (rightToMaybe)
 import Data.Text.Read (decimal)
 
 expirationTime :: IO NominalDiffTime
-expirationTime = utcTimeToPOSIXSeconds . addUTCTime (60 * 60 :: NominalDiffTime) <$> getCurrentTime
+expirationTime = utcTimeToPOSIXSeconds . addUTCTime (600 * 60 :: NominalDiffTime) <$> getCurrentTime
 
 createToken :: T.Text -> T.Text -> IO T.Text
 createToken secretKey userId = do
@@ -59,14 +60,18 @@ createToken secretKey userId = do
   }
 
 isTokenIdValid :: JWT VerifiedJWT -> PSQL.Connection -> IO Bool
-isTokenIdValid token conn = let JWTClaimsSet { jti } = claims token in case (do
-  encodedJti <- jti
-  intJti <- rightToMaybe $ (decimal . stringOrURIToText) encodedJti
-  pure intJti) of
-    (Just parsedIntJti) -> do
-      rows <- Db.getUserById conn (fst parsedIntJti)
-      pure $ length rows /= 0
-    Nothing -> pure False
+isTokenIdValid token conn = let JWTClaimsSet { jti } = claims token in case toInt jti of
+  (Just parsedIntJti) -> do
+    rows <- Db.getUserById conn parsedIntJti
+    pure $ not (null rows)
+  Nothing -> pure False
+  where
+    toInt :: Maybe StringOrURI -> Maybe Int
+    toInt stringJti = do
+      justJti <- stringJti
+      let textJti = stringOrURIToText justJti
+      parsedJti <- rightToMaybe $ decimal textJti
+      pure $ fst parsedJti
 
 isTokenTimeValid :: JWT VerifiedJWT -> IO Bool
 isTokenTimeValid token = let JWTClaimsSet { nbf } = claims token in

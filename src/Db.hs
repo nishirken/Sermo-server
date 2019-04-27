@@ -48,6 +48,5 @@ setUser dbConn email password = do
 getUserById :: Connection -> Int -> IO [(T.Text, T.Text)]
 getUserById dbConn userId = query
   dbConn
-  ("select u1.email, u2.email from " <>
-  "(users as u1 inner join users as u2 on u2.id=any(u1.friends_ids)) where u1.id=?;")
+  ("select email, password from users where id = ?")
   (Only userId)
