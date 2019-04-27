@@ -3,31 +3,11 @@
 
 module RestHandlers.Utils where
 
-import RestHandlers.Types (JSONResponse (..), JSONError (..), SuccessResponse (..))
 import qualified Data.Yaml as Yaml
 import Data.Yaml ((.=))
 import qualified Data.Text as Text
 import qualified Web.Scotty as Scotty
-    
-instance Yaml.ToJSON JSONError where
-  toJSON JSONError { code, message } = Yaml.object
-    [ "code" .= Yaml.toJSON code
-    , "message" .= Yaml.toJSON message
-    ]
-
-instance Yaml.ToJSON a => Yaml.ToJSON (JSONResponse a) where
-  toJSON JSONResponse { _data, _error } = Yaml.object
-    [ "data" .= Yaml.toJSON _data
-    , "error" .= Yaml.toJSON _error
-    ]
-
-instance Yaml.ToJSON SuccessResponse where
-  toJSON SuccessResponse { success } = Yaml.object [ "success" .= Yaml.toJSON success ]
-
-newtype TokenResponse = TokenResponse { token :: Text.Text }
-
-instance Yaml.ToJSON TokenResponse where
-    toJSON (TokenResponse token) = Yaml.object ["token" .= token]
+import Models.Index (JSONError (..), JSONResponse (..), SuccessResponse (..))
 
 makeDataResponse :: Yaml.ToJSON a => a -> Scotty.ActionM ()
 makeDataResponse x = Scotty.json . Yaml.toJSON $ JSONResponse (Just x) Nothing

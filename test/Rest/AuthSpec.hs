@@ -5,13 +5,13 @@
 module Rest.AuthSpec (authSpecIO) where
 
 import Test.Hspec (context, describe, it, Spec, shouldReturn, Expectation)
-import Rest.Utils (withMockedToken, logInPreparation)
+import Rest.Utils (withMockedToken, loginPreparation)
 import Test.Hspec.Wai (with, post, shouldRespondWith)
 import Test.Hspec.Wai.JSON (json, fromValue)
 import Data.Text.Encoding (encodeUtf8)
 import qualified Db
 import RestHandlers.Auth (createToken, isAuthorizedHandler, isTokenValid)
-import RestHandlers.Utils (TokenResponse (..))
+import Models.TokenObject (TokenObject (..))
 import qualified Data.Yaml as Yaml
 import Control.Monad.IO.Class (liftIO)
 import Config (makeTestConfig, Config (..))
@@ -28,11 +28,11 @@ makeTestToken conf@Config{ authKey } = do
   createToken authKey userId
 
 authSpecIO :: Spec
-authSpecIO = with logInPreparation $ describe "Authorization" $ do
+authSpecIO = with loginPreparation $ describe "Authorization" $ do
   it "Not authorize with wrong token" $
     post (encodeUtf8 "/auth") [json|{ token:"ababa" }|] `shouldRespondWith` [json|{ data: { success: false }, error: null }|]
   it "Authorize with right token" (do
     token <- liftIO (do
       config <- makeTestConfig
       makeTestToken config)
-    post (encodeUtf8 "/auth") (fromValue $ Yaml.toJSON $ TokenResponse token) `shouldRespondWith` [json|{ data: { success: true }, error: null }|])
+    post (encodeUtf8 "/auth") (fromValue $ Yaml.toJSON $ TokenObject token) `shouldRespondWith` [json|{ data: { success: true }, error: null }|])

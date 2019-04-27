@@ -10,7 +10,7 @@ import Data.Monoid ((<>))
 import GraphQL (Response, interpretAnonymousQuery)
 import GraphQL.API (Argument, Object, Field, (:>))
 import GraphQL.Resolver (Handler)
-import RestHandlers.Types (TokenRequest (..))
+import Models.Index (GraphQLRequest (..))
 import Network.HTTP.Types (status401)
 import Web.Scotty (ActionM, status, jsonData, json)
 import RestHandlers.Auth (isTokenValid)
@@ -32,6 +32,6 @@ queryHandler dbConn = interpretAnonymousQuery @User $ userHandler dbConn
 
 graphqlHandler :: T.Text -> Connection -> ActionM ()
 graphqlHandler authKey dbConn = do
-  TokenRequest { body, token } <- jsonData :: ActionM TokenRequest
-  isValid <- liftIO $ isTokenValid authKey token dbConn
-  if isValid then liftIO (queryHandler dbConn body) >>= json else status status401
+  GraphQLRequest { _body, _token } <- jsonData :: ActionM GraphQLRequest
+  isValid <- liftIO $ isTokenValid authKey _token dbConn
+  if isValid then liftIO (queryHandler dbConn _body) >>= json else status status401

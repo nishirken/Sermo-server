@@ -36,7 +36,8 @@ import Web.JWT (
 import Network.Wai (Middleware, mapResponseHeaders, mapResponseStatus)
 import Network.Wai.Internal (Request (..), Response (..))
 import Network.HTTP.Types (status401)
-import RestHandlers.Types (TokenRequest (..), SuccessResponse (..))
+import Models.Index (SuccessResponse (..))
+import Models.TokenObject (TokenObject (..))
 import Web.Scotty (ActionM, jsonData)
 import Control.Monad.IO.Class (liftIO)
 import qualified Database.PostgreSQL.Simple as PSQL
@@ -90,14 +91,8 @@ isTokenValid authKey token dbConn =
       pure $ idRes && expiredRes
     Nothing -> pure False
 
-newtype IsAuthorizedRequest = IsAuthorizedRequest { _token :: T.Text }
-
-instance Yaml.FromJSON IsAuthorizedRequest where
-  parseJSON (Yaml.Object v) = IsAuthorizedRequest
-    <$> v .: "token"
-
 isAuthorizedHandler :: T.Text -> PSQL.Connection -> ActionM ()
 isAuthorizedHandler authKey conn = do
-  IsAuthorizedRequest { _token } <- jsonData :: ActionM IsAuthorizedRequest
+  TokenObject { _token } <- jsonData :: ActionM TokenObject
   isValid <- liftIO $ isTokenValid authKey _token conn
   Utils.makeDataResponse $ SuccessResponse isValid

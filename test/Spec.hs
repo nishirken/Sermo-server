@@ -1,11 +1,13 @@
 import Test.Hspec (hspec)
-import Rest.LogInSpec (logInSpec)
-import Rest.SignInSpec (signInSpecApi, signInSpecDb)
+import Rest.LoginSpec (loginSpec)
+import Rest.SigninSpec (signinSpecApi, signinSpecDb)
 import Rest.AuthSpec (authSpecIO)
+import ModelsSpec (modelsSpec)
 
 main :: IO ()
 main = hspec $ do
-  logInSpec
-  signInSpecApi
-  signInSpecDb
+  loginSpec
+  signinSpecApi
+  signinSpecDb
   authSpecIO
+  modelsSpec

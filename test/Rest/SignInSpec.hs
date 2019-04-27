@@ -1,10 +1,10 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Rest.SignInSpec (signInSpecApi, signInSpecDb) where
+module Rest.SigninSpec (signinSpecApi, signinSpecDb) where
 
 import Test.Hspec (context, describe, it, Spec, shouldReturn)
-import Rest.Utils (withMockedToken, logInPreparation, preparation)
+import Rest.Utils (withMockedToken, loginPreparation, preparation)
 import Test.Hspec.Wai (with, post, shouldRespondWith)
 import Test.Hspec.Wai.JSON (json)
 import Data.Text.Encoding (encodeUtf8)
@@ -12,8 +12,8 @@ import qualified Db
 import Control.Monad.IO.Class (liftIO)
 import Config (makeTestConfig)
 
-signInSpecApi :: Spec
-signInSpecApi = with logInPreparation $ describe "SignIn Api" $ do
+signinSpecApi :: Spec
+signinSpecApi = with loginPreparation $ describe "Signin Api" $ do
   it "Respond 422 if email already exists" $
     post (encodeUtf8 "/signin") [json|{email: "test@mail.ru", password: "test123"}|] `shouldRespondWith`
       [json|{
@@ -33,8 +33,8 @@ signInSpecApi = with logInPreparation $ describe "SignIn Api" $ do
         error: null
       }|]
 
-signInSpecDb :: Spec
-signInSpecDb = describe "SignIn Db" $
+signinSpecDb :: Spec
+signinSpecDb = describe "Signin Db" $
   it "Successfully write new user in db" $ (do
     config <- makeTestConfig
     connection <- Db.makeConnection config

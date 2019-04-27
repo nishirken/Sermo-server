@@ -27,8 +27,8 @@ preparation = do
   app <- Scotty.scottyApp $ routes connection config
   pure $ (app, connection)
 
-logInPreparation :: IO Application
-logInPreparation = do
+loginPreparation :: IO Application
+loginPreparation = do
   (app, conn) <- preparation
   setUser conn "test@mail.ru" "right"
   pure app

@@ -7,8 +7,8 @@ import Web.Scotty (get, post, html, ScottyM, notFound, middleware, status, json,
 import Network.Wai.Middleware.Static (static)
 import Network.Wai.Middleware.Cors (cors, CorsResourcePolicy (..))
 import Database.PostgreSQL.Simple (Connection)
-import RestHandlers.LogIn
-import RestHandlers.SignIn
+import RestHandlers.Login (loginHandler)
+import RestHandlers.Signin (signinHandler)
 import RestHandlers.Auth (isAuthorizedHandler)
 import qualified Data.Yaml as Yaml
 import qualified RestHandlers.Utils as Utils
@@ -37,8 +37,8 @@ middlewares = do
 
 routes :: Connection -> Config -> ScottyM ()
 routes dbConn Config{ authKey } = do
-  post "/login" $ logInHandler authKey dbConn
-  post "/signin" $ signInHandler authKey dbConn
+  post "/login" $ loginHandler authKey dbConn
+  post "/signin" $ signinHandler authKey dbConn
   post "/graphql" $ graphqlHandler authKey dbConn
   post "/auth" $ isAuthorizedHandler authKey dbConn
   notFound $ Utils.makeErrorResponse 404 $ Just "Method not found"
