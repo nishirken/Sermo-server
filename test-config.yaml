@@ -1,0 +1,7 @@
+dbHost: 'test-psql'
+dbPort: 5432
+dbUser: 'postgres'
+dbName: 'postgres'
+
+appPort: 8000
+authKey: 'testKey'

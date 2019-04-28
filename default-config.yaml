@@ -1,0 +1,7 @@
+dbHost: 'dbHost'
+dbPort: 9999
+dbUser: 'dbUser'
+dbName: 'dbName'
+
+appPort: 8888
+authKey: 'authKey'
