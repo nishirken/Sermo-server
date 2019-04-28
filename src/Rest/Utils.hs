@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module RestHandlers.Utils where
+module Rest.Utils where
 
 import qualified Data.Yaml as Yaml
 import Data.Yaml ((.=))

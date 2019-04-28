@@ -7,11 +7,11 @@ import Web.Scotty (get, post, html, ScottyM, notFound, middleware, status, json,
 import Network.Wai.Middleware.Static (static)
 import Network.Wai.Middleware.Cors (cors, CorsResourcePolicy (..))
 import Database.PostgreSQL.Simple (Connection)
-import RestHandlers.Login (loginHandler)
-import RestHandlers.Signin (signinHandler)
-import RestHandlers.Auth (isAuthorizedHandler)
+import Rest.Login (loginHandler)
+import Rest.Signin (signinHandler)
+import Rest.Auth (isAuthorizedHandler)
 import qualified Data.Yaml as Yaml
-import qualified RestHandlers.Utils as Utils
+import qualified Rest.Utils as Utils
 import Data.Text.Encoding (encodeUtf8)
 import qualified Data.Text as T
 import Data.CaseInsensitive (mk)

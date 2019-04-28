@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Rest.Utils where
+module Utils where
 
 import Db (makeConnection, prepareDb, clearDb, setUser)
 import Routes (routes)
@@ -14,9 +14,6 @@ import qualified Data.Text as Text
 import Database.PostgreSQL.Simple (Connection)
 import qualified Text.Regex as Regex
 import qualified Data.ByteString.Lazy.Char8 as BSLazy
-
-testToken :: Text.Text
-testToken = ""
 
 preparation :: IO (Application, Connection)
 preparation = do

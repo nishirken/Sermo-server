@@ -13,7 +13,7 @@ import GraphQL.Resolver (Handler)
 import Models.Index (GraphQLRequest (..))
 import Network.HTTP.Types (status401)
 import Web.Scotty (ActionM, status, jsonData, json)
-import RestHandlers.Auth (isTokenValid)
+import Rest.Auth (isTokenValid)
 import Control.Monad.IO.Class (liftIO)
 import Database.PostgreSQL.Simple (Connection, Only (..))
 import qualified Db

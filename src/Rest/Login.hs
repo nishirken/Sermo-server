@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module RestHandlers.Login where
+module Rest.Login where
 
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TEncoding
@@ -15,8 +15,8 @@ import Control.Monad.IO.Class (liftIO)
 import Models.Index (LoginRequest (..))
 import Models.TokenObject (TokenObject (..))
 import qualified Db
-import qualified RestHandlers.Utils as Utils
-import RestHandlers.Auth (createToken)
+import qualified Rest.Utils as Utils
+import Rest.Auth (createToken)
 
 data LoginError =
   IncorrectPassword

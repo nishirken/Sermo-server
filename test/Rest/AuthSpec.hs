@@ -5,12 +5,12 @@
 module Rest.AuthSpec (authSpecIO) where
 
 import Test.Hspec (context, describe, it, Spec, shouldReturn, Expectation)
-import Rest.Utils (withMockedToken, loginPreparation)
+import Utils (withMockedToken, loginPreparation)
 import Test.Hspec.Wai (with, post, shouldRespondWith)
 import Test.Hspec.Wai.JSON (json, fromValue)
 import Data.Text.Encoding (encodeUtf8)
 import qualified Db
-import RestHandlers.Auth (createToken, isAuthorizedHandler, isTokenValid)
+import Rest.Auth (createToken, isAuthorizedHandler, isTokenValid)
 import Models.TokenObject (TokenObject (..))
 import qualified Data.Yaml as Yaml
 import Control.Monad.IO.Class (liftIO)
