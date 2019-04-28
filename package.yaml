@@ -73,3 +73,4 @@ tests:
     - bytestring
     - QuickCheck
     - aeson
+    - aeson-qq
