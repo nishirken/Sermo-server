@@ -10,7 +10,7 @@ import qualified Network.HTTP.Types as NetworkTypes
 import qualified Data.Yaml as Yaml
 import Control.Monad.IO.Class (liftIO)
 import qualified Rest.Utils as Utils
-import Models.Index (LoginRequest (..))
+import Models (LoginRequest (..))
 import Models.TokenObject (TokenObject (..))
 import qualified Db
 import qualified Rest.Auth as Auth

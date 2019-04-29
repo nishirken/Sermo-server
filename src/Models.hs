@@ -1,4 +1,4 @@
-module Models.Index (
+module Models (
   module Models.GraphQLRequest,
   module Models.JSONError,
   module Models.JSONResponse,

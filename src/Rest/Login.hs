@@ -12,7 +12,7 @@ import qualified Data.Yaml as Yaml
 import Data.Yaml ((.:), (.=))
 import Data.Either (either)
 import Control.Monad.IO.Class (liftIO)
-import Models.Index (LoginRequest (..))
+import Models (LoginRequest (..))
 import Models.TokenObject (TokenObject (..))
 import qualified Db
 import qualified Rest.Utils as Utils

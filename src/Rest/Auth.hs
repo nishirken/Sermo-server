@@ -35,7 +35,7 @@ import Web.JWT (
 import Network.Wai (Middleware, mapResponseHeaders, mapResponseStatus)
 import Network.Wai.Internal (Request (..), Response (..))
 import Network.HTTP.Types (status401)
-import Models.Index (SuccessResponse (..))
+import Models (SuccessResponse (..))
 import Models.TokenObject (TokenObject (..))
 import Web.Scotty (ActionM, jsonData)
 import Control.Monad.IO.Class (liftIO)
