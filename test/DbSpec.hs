@@ -20,16 +20,16 @@ dbPreparation = do
 
 dbSpec :: Spec
 dbSpec = describe "DbSpec" $ do
-  res <- liftIO (do
-    conn <- dbPreparation
-    Db.setUser conn testEmail "123456"
-    Db.getUserCredsByEmail conn testEmail)
-  it "get user by email" $ res `shouldSatisfy` (not . null)
+  it "get user by email" $ do
+    res <- liftIO (do
+      conn <- dbPreparation
+      Db.setUser conn testEmail "123456"
+      Db.getUserCredsByEmail conn testEmail)
+    res `shouldSatisfy` (not . null)
 
-  -- it "get user by id" (do
-  --   isExists <- liftIO (do
-  --     conn <- dbPreparation
-  --     [(Only id)] <- Db.setUser conn testEmail "123456"
-  --     res <- Db.getUserById conn id
-  --     pure $ not (null res))
-  --   isExists `shouldReturn` True)
+  it "get user by id" $ do
+    res <- liftIO (do
+      conn <- dbPreparation
+      [(Only id)] <- Db.setUser conn testEmail "123456"
+      Db.getUserById conn id)
+    res `shouldSatisfy` (not . null)

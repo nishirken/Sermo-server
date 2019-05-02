@@ -2,7 +2,7 @@ module ArbitraryInstances where
 
 import Test.QuickCheck (Arbitrary (..), Gen)
 
-import Models.Index (JSONError (..), JSONResponse (..), LoginRequest (..), SuccessResponse (..), GraphQLRequest (..))
+import Models (JSONError (..), JSONResponse (..), LoginRequest (..), SuccessResponse (..), GraphQLRequest (..))
 import Models.TokenObject (TokenObject (..))
 import Data.Text as Text
 
