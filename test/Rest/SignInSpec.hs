@@ -4,7 +4,7 @@
 module Rest.SigninSpec (signinSpecApi, signinSpecDb) where
 
 import Test.Hspec (context, describe, it, Spec, shouldReturn)
-import Utils (withMockedToken, loginPreparation, preparation)
+import TestUtils (withMockedToken, loginPreparation, preparation)
 import Test.Hspec.Wai (with, post, shouldRespondWith)
 import Test.Hspec.Wai.JSON (json)
 import Data.Text.Encoding (encodeUtf8)

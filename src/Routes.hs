@@ -11,12 +11,12 @@ import Rest.Login (loginHandler)
 import Rest.Signin (signinHandler)
 import Rest.Auth (isAuthorizedHandler)
 import qualified Data.Yaml as Yaml
-import qualified Rest.Utils as Utils
 import Data.Text.Encoding (encodeUtf8)
 import qualified Data.Text as T
 import Data.CaseInsensitive (mk)
 import Config (Config (..))
-import Main.Schemas (graphqlHandler)
+import qualified Utils
+import Main.Schemas (interpretUserQuery)
 import Control.Monad.IO.Class (liftIO)
 
 corsConfig = CorsResourcePolicy {
@@ -39,6 +39,6 @@ routes :: Connection -> Config -> ScottyM ()
 routes dbConn Config{ authKey } = do
   post "/login" $ loginHandler authKey dbConn
   post "/signin" $ signinHandler authKey dbConn
-  post "/graphql" $ graphqlHandler authKey dbConn
+  post "/graphql" $ Utils.graphqlHandler authKey dbConn interpretUserQuery
   post "/auth" $ isAuthorizedHandler authKey dbConn
   notFound $ Utils.makeErrorResponse 404 $ Just "Method not found"

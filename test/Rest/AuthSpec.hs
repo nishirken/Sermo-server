@@ -5,7 +5,7 @@
 module Rest.AuthSpec (authSpecIO) where
 
 import Test.Hspec (context, describe, it, Spec, shouldReturn, Expectation)
-import Utils (withMockedToken, loginPreparation)
+import TestUtils (withMockedToken, loginPreparation)
 import Test.Hspec.Wai (with, post, shouldRespondWith)
 import Test.Hspec.Wai.JSON (json, fromValue)
 import Data.Text.Encoding (encodeUtf8)

@@ -33,3 +33,12 @@ dbSpec = describe "DbSpec" $ do
       [(Only id)] <- Db.setUser conn testEmail "123456"
       Db.getUserById conn id)
     res `shouldSatisfy` (not . null)
+
+  it "get users" $ do
+    res <- liftIO (do
+      conn <- dbPreparation
+      [(Only id)] <- Db.setUser conn testEmail "123456"
+      [(Only id')] <- Db.setUser conn "test1@email.ru" "123456"
+      [(Only id'')] <- Db.setUser conn "test2@email.ru" "123456"
+      Db.getUsers conn [id, id', id''])
+    (length res) `shouldBe` 3

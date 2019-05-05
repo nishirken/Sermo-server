@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Rest.Login where
 
@@ -12,10 +12,11 @@ import qualified Data.Yaml as Yaml
 import Data.Yaml ((.:), (.=))
 import Data.Either (either)
 import Control.Monad.IO.Class (liftIO)
-import Models (LoginRequest (..))
-import Models.TokenObject (TokenObject (..))
+import qualified Models.LoginRequest as LoginRequest
+import qualified Models.TokenObject as TokenObject
+import qualified Models.DbFullUserCreds as FullCreds
 import qualified Db
-import qualified Rest.Utils as Utils
+import qualified Utils
 import Rest.Auth (createToken)
 
 data LoginError =
@@ -42,17 +43,17 @@ validate :: PSQL.Connection -> T.Text -> T.Text -> IO (Either LoginError Int)
 validate dbConn email password = do
   rows <- Db.getUserCredsByEmail dbConn email
   case rows of
-    [(id, email', password')] ->
-        pure $ if verify password password' then Right id else Left IncorrectPassword
+    [FullCreds.DbFullUserCreds {..}] ->
+      pure $ if verify password _password then Right _id else Left IncorrectPassword
     [] -> pure $ Left IncorrectEmail
     _ -> pure $ Left InternalError
 
 loginHandler :: T.Text -> PSQL.Connection -> Scotty.ActionM ()
 loginHandler authKey dbConn = do
-  LoginRequest { _email, _password } <- Scotty.jsonData :: Scotty.ActionM LoginRequest
+  LoginRequest.LoginRequest {..} <- Scotty.jsonData :: Scotty.ActionM LoginRequest.LoginRequest
   validated <- liftIO $ validate dbConn _email _password
   case validated of
     (Right userId) -> do
         token <- liftIO $ createToken authKey $ (T.pack . show) userId
-        Utils.makeDataResponse $ TokenObject token
+        Utils.makeDataResponse $ TokenObject.TokenObject token
     (Left err) -> errorToStatus err

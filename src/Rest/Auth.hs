@@ -42,7 +42,7 @@ import Control.Monad.IO.Class (liftIO)
 import qualified Database.PostgreSQL.Simple as PSQL
 import qualified Data.Yaml as Yaml
 import Data.Yaml ((.:))
-import qualified Rest.Utils as Utils
+import qualified Utils
 import qualified Db
 import Data.Either.Combinators (rightToMaybe)
 import Data.Text.Read (decimal)
@@ -62,7 +62,7 @@ createToken secretKey userId = do
 isTokenIdValid :: JWT VerifiedJWT -> PSQL.Connection -> IO Bool
 isTokenIdValid token conn = let JWTClaimsSet { jti } = claims token in case toInt jti of
   (Just parsedIntJti) -> do
-    rows <- Db.getUserById conn parsedIntJti
+    rows <- Db.getUserCredsById conn parsedIntJti
     pure $ not (null rows)
   Nothing -> pure False
   where

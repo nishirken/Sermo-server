@@ -9,7 +9,7 @@ import qualified Database.PostgreSQL.Simple as PSQL
 import qualified Network.HTTP.Types as NetworkTypes
 import qualified Data.Yaml as Yaml
 import Control.Monad.IO.Class (liftIO)
-import qualified Rest.Utils as Utils
+import qualified Utils
 import Models (LoginRequest (..))
 import Models.TokenObject (TokenObject (..))
 import qualified Db
