@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module RestHandlers.Signin where
+module Rest.Signin where
 
 import qualified Data.Text as T
 import qualified Web.Scotty as Scotty
@@ -9,11 +9,11 @@ import qualified Database.PostgreSQL.Simple as PSQL
 import qualified Network.HTTP.Types as NetworkTypes
 import qualified Data.Yaml as Yaml
 import Control.Monad.IO.Class (liftIO)
-import qualified RestHandlers.Utils as Utils
-import Models.Index (LoginRequest (..))
+import qualified Rest.Utils as Utils
+import Models (LoginRequest (..))
 import Models.TokenObject (TokenObject (..))
 import qualified Db
-import qualified RestHandlers.Auth as Auth
+import qualified Rest.Auth as Auth
 
 data SigninError =
   EmailAlreadyExists

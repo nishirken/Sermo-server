@@ -7,7 +7,7 @@ import Test.Hspec (context, describe, it, Spec)
 import Test.Hspec.Wai (with, post, shouldRespondWith)
 import Test.Hspec.Wai.JSON (json)
 import Data.Text.Encoding (encodeUtf8)
-import Rest.Utils (preparation, withMockedToken, loginPreparation)
+import Utils (preparation, withMockedToken, loginPreparation)
 
 incorrectError = [json|{
   data:null,

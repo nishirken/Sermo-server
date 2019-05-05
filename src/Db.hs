@@ -48,5 +48,5 @@ setUser dbConn email password = do
 getUserById :: Connection -> Int -> IO [(T.Text, T.Text)]
 getUserById dbConn userId = query
   dbConn
-  ("select email, password from users where id = ?")
+  "select email, password from users where id = ?"
   (Only userId)

@@ -1,8 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module
-RestHandlers.Auth (isTokenValid, createToken, isAuthorizedHandler) where
+module Rest.Auth (isTokenValid, createToken, isAuthorizedHandler) where
 
 import Data.List (find)
 import Data.Maybe (maybe)
@@ -36,14 +35,14 @@ import Web.JWT (
 import Network.Wai (Middleware, mapResponseHeaders, mapResponseStatus)
 import Network.Wai.Internal (Request (..), Response (..))
 import Network.HTTP.Types (status401)
-import Models.Index (SuccessResponse (..))
+import Models (SuccessResponse (..))
 import Models.TokenObject (TokenObject (..))
 import Web.Scotty (ActionM, jsonData)
 import Control.Monad.IO.Class (liftIO)
 import qualified Database.PostgreSQL.Simple as PSQL
 import qualified Data.Yaml as Yaml
 import Data.Yaml ((.:))
-import qualified RestHandlers.Utils as Utils
+import qualified Rest.Utils as Utils
 import qualified Db
 import Data.Either.Combinators (rightToMaybe)
 import Data.Text.Read (decimal)

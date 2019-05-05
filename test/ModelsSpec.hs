@@ -4,7 +4,7 @@
 module ModelsSpec (modelsSpec) where
 
 import Test.Hspec (context, describe, it, Spec, shouldBe)
-import Models.Index (JSONError (..), JSONResponse (..), SuccessResponse (..), GraphQLRequest (..), LoginRequest (..))
+import Models (JSONError (..), JSONResponse (..), SuccessResponse (..), GraphQLRequest (..), LoginRequest (..))
 import Models.TokenObject (TokenObject (..))
 import Test.QuickCheck (property)
 import ArbitraryInstances

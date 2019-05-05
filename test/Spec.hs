@@ -3,6 +3,7 @@ import Rest.LoginSpec (loginSpec)
 import Rest.SigninSpec (signinSpecApi, signinSpecDb)
 import Rest.AuthSpec (authSpecIO)
 import ModelsSpec (modelsSpec)
+import DbSpec (dbSpec)
 
 main :: IO ()
 main = hspec $ do
@@ -11,3 +12,4 @@ main = hspec $ do
   signinSpecDb
   authSpecIO
   modelsSpec
+  dbSpec

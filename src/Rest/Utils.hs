@@ -1,13 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module RestHandlers.Utils where
+module Rest.Utils where
 
 import qualified Data.Yaml as Yaml
 import Data.Yaml ((.=))
 import qualified Data.Text as Text
 import qualified Web.Scotty as Scotty
-import Models.Index (JSONError (..), JSONResponse (..), SuccessResponse (..))
+import Models (JSONError (..), JSONResponse (..), SuccessResponse (..))
 
 makeDataResponse :: Yaml.ToJSON a => a -> Scotty.ActionM ()
 makeDataResponse x = Scotty.json . Yaml.toJSON $ JSONResponse (Just x) Nothing
