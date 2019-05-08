@@ -22,13 +22,13 @@ type User = Object "User" '[]
   '[ Field "id" Int :> Field "email" Text.Text ]
 
 type UserQuery = Object "UserQuery" '[]
-  '[ Field "user" Text.Text ]
+  '[ Field "user" Text.Text :> Field "user1" Text.Text ]
 
 userQueryHandler :: PSQL.Connection -> Handler IO UserQuery
-userQueryHandler dbConn = (pure . pure) "USER" 
-    where
-      userHandler id email = pure $ pure id :<> pure email
-      friendsEmails = map (\DbUser.DbUser {..} -> _email)
+userQueryHandler dbConn = pure $ pure "USER" :<> pure "USER1"
+  where
+    userHandler id email = pure $ pure id :<> pure email
+    friendsEmails = map (\DbUser.DbUser {..} -> _email)
 
 interpretUserQuery :: Utils.QueryHandler
 interpretUserQuery dbConn = interpretAnonymousQuery @UserQuery $ userQueryHandler dbConn
