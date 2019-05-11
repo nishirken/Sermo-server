@@ -4,7 +4,14 @@
 module ModelsSpec (modelsSpec) where
 
 import Test.Hspec (context, describe, it, Spec, shouldBe)
-import Models (JSONError (..), JSONResponse (..), SuccessResponse (..), GraphQLRequest (..), LoginRequest (..))
+import Models (
+  JSONError (..)
+  , JSONResponse (..)
+  , SuccessResponse (..)
+  , GraphQLRequest (..)
+  , GraphQLQuery (..)
+  , LoginRequest (..)
+  )
 import Models.TokenObject (TokenObject (..))
 import Test.QuickCheck (property)
 import ArbitraryInstances
@@ -28,8 +35,8 @@ modelsSpec = describe "Common rest models" $ do
   context "JSONResponse model" $ do
     it "JSON encode decode" $ property (testJSON :: TestJSON (JSONResponse GraphQLRequest))
     it "Success decode" $
-      Aeson.toJSON (JSONResponse (Just $ GraphQLRequest "token22" "graphQLBody") Nothing) `shouldBe`
-        [aesonQQ|{ data: { token: "token22", body: "graphQLBody" }, error: null }|]
+      Aeson.toJSON (JSONResponse (Just ("data" :: String)) Nothing) `shouldBe`
+        [aesonQQ|{ data: "data", error: null }|]
   context "SuccessResponse model" $ do
     it "JSON encode decode" $ property (testJSON :: TestJSON SuccessResponse)
     it "Success decode" $
@@ -38,10 +45,14 @@ modelsSpec = describe "Common rest models" $ do
     it "JSON encode decode" $ property (testJSON :: TestJSON LoginRequest)
     it "Success decode" $ Aeson.toJSON (LoginRequest "mail@test.ru" "123456") `shouldBe`
       [aesonQQ|{ email: "mail@test.ru", password: "123456" }|]
+  context "GraphQLQuery model" $ do
+    it "JSON encode decode" $ property (testJSON :: TestJSON GraphQLQuery)
+    it "Success decode" $ Aeson.toJSON (GraphQLQuery "grahpQlQuery") `shouldBe`
+      [aesonQQ|{ query: "grahpQlQuery" }|]
   context "GraphQLRequest model" $ do
     it "JSON encode decode" $ property (testJSON :: TestJSON GraphQLRequest)
-    it "Success decode" $ Aeson.toJSON (GraphQLRequest "token22" "graphQLBody") `shouldBe`
-      [aesonQQ|{ token: "token22", body: "graphQLBody" }|]
+    it "Success decode" $ Aeson.toJSON (GraphQLRequest "token22" $ GraphQLQuery "graphQLQuery") `shouldBe`
+      [aesonQQ|{ token: "token22", body: { query: "graphQLQuery" } }|]
   context "TokenObject model" $ do
     it "JSON encode decode" $ property (testJSON :: TestJSON TokenObject)
     it "Success decode" $ 

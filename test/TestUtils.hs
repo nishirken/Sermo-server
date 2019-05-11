@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Utils where
+module TestUtils where
 
 import Db (makeConnection, prepareDb, clearDb, setUser)
 import Routes (routes)

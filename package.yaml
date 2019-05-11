@@ -72,4 +72,5 @@ tests:
     - wai-extra
     - bytestring
     - QuickCheck
+    - aeson
     - aeson-qq
