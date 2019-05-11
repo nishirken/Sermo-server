@@ -7,7 +7,7 @@ data DbFullUserCreds = DbFullUserCreds
   { _id :: Int
   , _email :: Text.Text
   , _password :: Text.Text
-  }
+  } deriving (Eq, Show)
 
 instance PSQL.FromRow DbFullUserCreds where
   fromRow = DbFullUserCreds <$> PSQL.field <*> PSQL.field <*> PSQL.field

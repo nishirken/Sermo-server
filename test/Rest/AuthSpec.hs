@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Rest.AuthSpec (authSpecIO) where
 
@@ -10,6 +10,7 @@ import Test.Hspec.Wai (with, post, shouldRespondWith)
 import Test.Hspec.Wai.JSON (json, fromValue)
 import Data.Text.Encoding (encodeUtf8)
 import qualified Db
+import Models.DbFullUserCreds (DbFullUserCreds (..))
 import Rest.Auth (createToken, isAuthorizedHandler, isTokenValid)
 import Models.TokenObject (TokenObject (..))
 import qualified Data.Yaml as Yaml
@@ -17,15 +18,11 @@ import Control.Monad.IO.Class (liftIO)
 import Config (makeTestConfig, Config (..))
 import qualified Data.Text as Text
 
-fst3 :: (a, b, c) -> a
-fst3 (x, _, _) = x
-
 makeTestToken :: Config -> IO Text.Text
-makeTestToken conf@Config{ authKey } = do
+makeTestToken conf@Config {..} = do
   connection <- Db.makeConnection conf
-  rows <- Db.getUserCredsByEmail connection "test@mail.ru"
-  let userId = (Text.pack . show . fst3 . head) rows
-  createToken authKey userId
+  [DbFullUserCreds {..}] <- Db.getUserCredsByEmail connection "test@mail.ru"
+  createToken authKey $ (Text.pack . show) _id
 
 authSpecIO :: Spec
 authSpecIO = with loginPreparation $ describe "Authorization" $ do

@@ -9,7 +9,7 @@ import Data.Text.Encoding (encodeUtf8)
 import qualified Models.DbUser as DbUser
 import qualified Models.DbFullUserCreds as DbFullUserCreds
 import qualified Models.DbUserCreds as DbUserCreds
-import Database.PostgreSQL.Simple (Connection, execute, Only (..), query, connectPostgreSQL, Query)
+import Database.PostgreSQL.Simple (Connection, execute, Only (..), query, connectPostgreSQL, Query, In (..))
 import Crypto.Scrypt (defaultParams, encryptPassIO', Pass (..), getEncryptedPass)
 import Config (Config (..))
 
@@ -54,11 +54,12 @@ setUser dbConn email password = do
   hash <- encryptPassIO' (Pass . encodeUtf8 $ password)
   query dbConn "insert into users (email, password) values (?,?) returning id;" (email, getEncryptedPass hash)
 
-getUser :: Connection -> Int -> IO [DbUser.DbUser]
-getUser dbConn userId = query
+getUserById :: Connection -> Int -> IO [DbUser.DbUser]
+getUserById dbConn userId = query
   dbConn
   "select id, email, friends_ids from users where id = ?"
   (Only userId)
 
-getUsers :: Connection -> [Int] -> IO [DbUser.DbUser]
-getUsers dbConn = query dbConn "select id, emailm friends_ids from users where id in ?"
+getUsersByIds :: Connection -> [Int] -> IO [DbUser.DbUser]
+getUsersByIds dbConn ids =
+  query dbConn "select id, email, friends_ids from users where id in ?" $ Only $ In ids

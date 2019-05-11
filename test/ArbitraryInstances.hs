@@ -2,9 +2,19 @@ module ArbitraryInstances where
 
 import Test.QuickCheck (Arbitrary (..), Gen)
 
-import Models (JSONError (..), JSONResponse (..), LoginRequest (..), SuccessResponse (..), GraphQLRequest (..))
+import Models (
+  JSONError (..)
+  , JSONResponse (..)
+  , LoginRequest (..)
+  , SuccessResponse (..)
+  , GraphQLRequest (..)
+  , GraphQLQuery (..)
+  )
 import Models.TokenObject (TokenObject (..))
 import Data.Text as Text
+
+arbitraryText :: Gen Text
+arbitraryText = Text.pack <$> (arbitrary :: Gen String)
 
 instance Arbitrary JSONError where
   arbitrary = do
@@ -18,17 +28,16 @@ instance (Arbitrary a) => Arbitrary (JSONResponse a) where
     JSONResponse x <$> arbitrary
 
 instance Arbitrary LoginRequest where
-  arbitrary = do
-    x <- arbitrary :: Gen String
-    LoginRequest (Text.pack x) . Text.pack <$> (arbitrary :: Gen String)
+  arbitrary = LoginRequest <$> arbitraryText <*> arbitraryText 
 
 instance Arbitrary SuccessResponse where
   arbitrary = SuccessResponse <$> arbitrary
 
+instance Arbitrary GraphQLQuery where
+  arbitrary = GraphQLQuery <$> arbitraryText
+
 instance Arbitrary GraphQLRequest where
-  arbitrary = do
-    x <- arbitrary :: Gen String
-    GraphQLRequest (Text.pack x) . Text.pack <$> (arbitrary :: Gen String)
+  arbitrary = GraphQLRequest <$> arbitraryText <*> (arbitrary :: Gen GraphQLQuery)
 
 instance Arbitrary TokenObject where
-  arbitrary = (TokenObject . Text.pack) <$> (arbitrary :: Gen String)
+  arbitrary = TokenObject <$> arbitraryText
