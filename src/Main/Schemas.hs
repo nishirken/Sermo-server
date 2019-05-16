@@ -22,7 +22,7 @@ type Friend = Object "Friend" '[]
 type User = Object "User" '[]
   '[ Field "id" Text.Text, Field "email" Text.Text, Field "friends" (List Text.Text) ]
 
-type UserQuery = Object "UserQuery" '[]
+type RootQuery = Object "RootQuery" '[]
   '[ Argument "id" Text.Text :> Field "user" (Maybe User) ]
 
 friendHandler :: DbUser.DbUser -> Handler IO Text.Text
@@ -35,8 +35,8 @@ userHandler :: Int -> Text.Text -> [DbUser.DbUser] -> Handler IO User
 userHandler id email friends = pure $
   pure ((Text.pack . show) id) :<> pure email :<> friendsHandler friends
 
-userQueryHandler :: PSQL.Connection -> Handler IO UserQuery
-userQueryHandler dbConn = pure $ \userId -> do
+rootQueryHandler :: PSQL.Connection -> Handler IO RootQuery
+rootQueryHandler dbConn = pure $ \userId -> do
   result <- Db.getUserById dbConn (read @Int $ Text.unpack userId)
   case result of
     [DbUser.DbUser {..}] -> do
@@ -44,5 +44,5 @@ userQueryHandler dbConn = pure $ \userId -> do
       pure $ Just $ userHandler _id _email friends
     _ -> pure Nothing
 
-interpretUserQuery :: Utils.QueryHandler
-interpretUserQuery dbConn = interpretAnonymousQuery @UserQuery $ userQueryHandler dbConn
+interpretRootQuery :: Utils.QueryHandler
+interpretRootQuery dbConn = interpretAnonymousQuery @RootQuery $ rootQueryHandler dbConn

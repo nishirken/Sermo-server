@@ -16,7 +16,7 @@ import qualified Data.Text as T
 import Data.CaseInsensitive (mk)
 import Config (Config (..))
 import qualified Utils
-import Main.Schemas (interpretUserQuery)
+import Main.Schemas (interpretRootQuery)
 import Control.Monad.IO.Class (liftIO)
 
 corsConfig = CorsResourcePolicy {
@@ -39,6 +39,6 @@ routes :: Connection -> Config -> ScottyM ()
 routes dbConn Config{ authKey } = do
   post "/login" $ loginHandler authKey dbConn
   post "/signin" $ signinHandler authKey dbConn
-  post "/graphql" $ Utils.graphqlHandler authKey dbConn interpretUserQuery
+  post "/graphql" $ Utils.graphqlHandler authKey dbConn interpretRootQuery
   post "/auth" $ isAuthorizedHandler authKey dbConn
   notFound $ Utils.makeErrorResponse 404 $ Just "Method not found"
