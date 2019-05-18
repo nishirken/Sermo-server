@@ -10,6 +10,7 @@ import Database.PostgreSQL.Simple (Connection)
 import Rest.Login (loginHandler)
 import Rest.Signin (signinHandler)
 import Rest.Auth (isAuthorizedHandler)
+import Rest.Graphql.Introspection (graphqlSchemaHandler)
 import qualified Data.Yaml as Yaml
 import Data.Text.Encoding (encodeUtf8)
 import qualified Data.Text as T
@@ -40,5 +41,6 @@ routes dbConn Config{ authKey } = do
   post "/login" $ loginHandler authKey dbConn
   post "/signin" $ signinHandler authKey dbConn
   post "/graphql" $ Utils.graphqlHandler authKey dbConn interpretRootQuery
+  post "/graphql-schema" $ graphqlSchemaHandler authKey dbConn
   post "/auth" $ isAuthorizedHandler authKey dbConn
   notFound $ Utils.makeErrorResponse 404 $ Just "Method not found"
