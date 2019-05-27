@@ -6,6 +6,7 @@ module Utils where
 import qualified Data.Yaml as Yaml
 import Data.Yaml ((.=))
 import qualified Data.Text as Text
+import qualified Text.Regex as TextRegex
 import qualified Web.Scotty as Scotty
 import qualified Database.PostgreSQL.Simple as PSQL
 import qualified GraphQL
@@ -31,5 +32,10 @@ graphqlHandler :: Text.Text -> PSQL.Connection -> QueryHandler -> Scotty.ActionM
 graphqlHandler authKey dbConn handler = do
   -- GraphQLRequest { _body, _token } <- Scotty.jsonData :: Scotty.ActionM GraphQLRequest
   GraphQLQuery { _query } <- Scotty.jsonData
-  liftIO $ print _query
-  liftIO (handler dbConn _query) >>= Scotty.json
+  if isIntrospection _query
+    then Scotty.file "./src/Rest/Graphql/introspectionResponse.json"
+    else (liftIO $ handler dbConn _query) >>= Scotty.json
+    where
+      isIntrospection :: Text.Text -> Bool
+      isIntrospection query =
+        (TextRegex.matchRegex (TextRegex.mkRegex "IntrospectionQuery") $ Text.unpack query) /= Nothing

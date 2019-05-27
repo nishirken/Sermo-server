@@ -44,7 +44,6 @@ import qualified Data.Yaml as Yaml
 import Data.Yaml ((.:))
 import qualified Utils
 import qualified Db
-import Data.Either.Combinators (rightToMaybe)
 import Data.Text.Read (decimal)
 
 expirationTime :: IO NominalDiffTime
@@ -69,7 +68,11 @@ isTokenIdValid token conn = let JWTClaimsSet { jti } = claims token in case toIn
     toInt :: Maybe StringOrURI -> Maybe Int
     toInt stringJti = do
       justJti <- stringJti
-      let textJti = stringOrURIToText justJti
+      let
+        textJti = stringOrURIToText justJti
+        rightToMaybe eitherValue = case eitherValue of
+          (Left _) -> Nothing
+          (Right x) -> Just x
       parsedJti <- rightToMaybe $ decimal textJti
       pure $ fst parsedJti
 

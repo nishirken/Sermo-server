@@ -39,7 +39,7 @@ dependencies:
 - wai-cors
 - case-insensitive
 - graphql-api
-- either
+- regex-compat
 
 library:
   source-dirs: src
@@ -68,7 +68,6 @@ tests:
     - hspec
     - hspec-wai
     - hspec-wai-json
-    - regex-compat
     - wai-extra
     - bytestring
     - QuickCheck
