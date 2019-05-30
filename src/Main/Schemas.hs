@@ -21,16 +21,16 @@ type Friend = Object "Friend" '[]
   '[ Field "id" Int32, Field "email" Text.Text ]
 
 type User = Object "User" '[]
-  '[ Field "id" Int32, Field "email" Text.Text, Field "friends" (List Text.Text) ]
+  '[ Field "id" Int32, Field "email" Text.Text, Field "friends" (List Friend) ]
 
 type RootQuery = Object "RootQuery" '[]
   '[ Argument "id" Int32 :> Field "user" (Maybe User) ]
 
-friendHandler :: DbUser.DbUser -> Handler IO Text.Text
-friendHandler DbUser.DbUser {..} = pure _email
-
-friendsHandler :: [DbUser.DbUser] -> Handler IO (List Text.Text)
+friendsHandler :: [DbUser.DbUser] -> Handler IO (List Friend)
 friendsHandler friends = pure $ map friendHandler friends
+  where
+    friendHandler :: DbUser.DbUser -> Handler IO Friend
+    friendHandler DbUser.DbUser{..} = pure (pure (fromIntegral _id :: Int32) :<> pure _email)
 
 userHandler :: Int32 -> Text.Text -> [DbUser.DbUser] -> Handler IO User
 userHandler id email friends = pure (pure id :<> pure email :<> friendsHandler friends)
