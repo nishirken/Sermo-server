@@ -9,10 +9,10 @@ import Models (
   , JSONResponse (..)
   , SuccessResponse (..)
   , GraphQLRequest (..)
-  , GraphQLQuery (..)
   , LoginRequest (..)
   )
 import Models.TokenObject (TokenObject (..))
+import Models.GraphQLErrorResponse (GraphQLErrorResponse (..), GraphQLError (..))
 import Test.QuickCheck (property)
 import ArbitraryInstances
 import qualified Data.Yaml as Yaml
@@ -45,14 +45,15 @@ modelsSpec = describe "Common rest models" $ do
     it "JSON encode decode" $ property (testJSON :: TestJSON LoginRequest)
     it "Success decode" $ Aeson.toJSON (LoginRequest "mail@test.ru" "123456") `shouldBe`
       [aesonQQ|{ email: "mail@test.ru", password: "123456" }|]
-  context "GraphQLQuery model" $ do
-    it "JSON encode decode" $ property (testJSON :: TestJSON GraphQLQuery)
-    it "Success decode" $ Aeson.toJSON (GraphQLQuery "grahpQlQuery") `shouldBe`
-      [aesonQQ|{ query: "grahpQlQuery" }|]
+  context "GraphQLErrorResponse model" $ do
+    it "JSON encode decode" $ property (testJSON :: TestJSON GraphQLErrorResponse)
+    it "Success decode" $ 
+      Aeson.toJSON (GraphQLErrorResponse [GraphQLError "Auth error"]) `shouldBe`
+        [aesonQQ|{ errors: [{ message: "Auth error" }] }|]
   context "GraphQLRequest model" $ do
     it "JSON encode decode" $ property (testJSON :: TestJSON GraphQLRequest)
-    it "Success decode" $ Aeson.toJSON (GraphQLRequest "token22" $ GraphQLQuery "graphQLQuery") `shouldBe`
-      [aesonQQ|{ token: "token22", body: { query: "graphQLQuery" } }|]
+    it "Success decode" $ Aeson.toJSON (GraphQLRequest "token22" "query { userId }") `shouldBe`
+      [aesonQQ|{ token: "token22", body: "query { userId }" }|]
   context "TokenObject model" $ do
     it "JSON encode decode" $ property (testJSON :: TestJSON TokenObject)
     it "Success decode" $ 

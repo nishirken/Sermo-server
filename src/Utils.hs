@@ -1,17 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE NamedFieldPuns #-}
 
 module Utils where
 
 import qualified Data.Yaml as Yaml
+import qualified Rest.Auth as Auth
 import Data.Yaml ((.=))
 import qualified Data.Text as Text
-import qualified Text.Regex as TextRegex
 import qualified Web.Scotty as Scotty
-import qualified Database.PostgreSQL.Simple as PSQL
-import qualified GraphQL
-import Models (JSONError (..), JSONResponse (..), SuccessResponse (..), GraphQLRequest (..), GraphQLQuery (..))
-import Control.Monad.IO.Class (liftIO)
+import Models (JSONError (..), JSONResponse (..), SuccessResponse (..))
 
 makeDataResponse :: Yaml.ToJSON a => a -> Scotty.ActionM ()
 makeDataResponse x = Scotty.json . Yaml.toJSON $ JSONResponse (Just x) Nothing
@@ -25,11 +21,3 @@ makeSuccessResponse = makeDataResponse $ SuccessResponse True
 
 makeInternalErrorResponse :: Scotty.ActionM ()
 makeInternalErrorResponse = makeErrorResponse 500 $ Just "Internal error"
-
-type QueryHandler = PSQL.Connection -> Text.Text -> IO GraphQL.Response
-
-graphqlHandler :: Text.Text -> PSQL.Connection -> QueryHandler -> Scotty.ActionM ()
-graphqlHandler authKey dbConn handler = do
-  -- GraphQLRequest { _body, _token } <- Scotty.jsonData :: Scotty.ActionM GraphQLRequest
-  GraphQLQuery { _query } <- Scotty.jsonData
-  (liftIO $ handler dbConn _query) >>= Scotty.json
