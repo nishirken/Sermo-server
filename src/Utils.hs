@@ -32,4 +32,4 @@ graphqlHandler :: Text.Text -> PSQL.Connection -> QueryHandler -> Scotty.ActionM
 graphqlHandler authKey dbConn handler = do
   -- GraphQLRequest { _body, _token } <- Scotty.jsonData :: Scotty.ActionM GraphQLRequest
   GraphQLQuery { _query } <- Scotty.jsonData
-  liftIO $ handler dbConn _query >>= Scotty.json
+  (liftIO $ handler dbConn _query) >>= Scotty.json

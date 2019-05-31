@@ -1,9 +1,0 @@
-type User {
-  email: String!
-  id: String!
-  friends: [User!]!
-}
-
-type Query {
-  user(id: String!): User
-}
