@@ -13,7 +13,7 @@ import Data.Yaml ((.:), (.=))
 import Data.Either (either)
 import Control.Monad.IO.Class (liftIO)
 import qualified Models.LoginRequest as LoginRequest
-import qualified Models.TokenObject as TokenObject
+import qualified Models.AuthResponse as AuthResponse
 import qualified Models.DbFullUserCreds as FullCreds
 import qualified Db
 import qualified Utils
@@ -55,5 +55,5 @@ loginHandler authKey dbConn = do
   case validated of
     (Right userId) -> do
         token <- liftIO $ createToken authKey $ (T.pack . show) userId
-        Utils.makeDataResponse $ TokenObject.TokenObject token
+        Utils.makeDataResponse $ AuthResponse.AuthResponse userId token
     (Left err) -> errorToStatus err

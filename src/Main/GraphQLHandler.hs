@@ -11,7 +11,6 @@ import qualified GraphQL
 import qualified GraphQL.Internal.Output as InternalGraphQL
 import qualified Data.List.NonEmpty as NonEmptyList
 import Control.Monad.IO.Class (liftIO)
-import Models.GraphQLErrorResponse (GraphQLErrorResponse (..), GraphQLError (..))
 import Models.GraphQLRequest (GraphQLRequest (..))
 
 type GraphqlResponseHandler = PSQL.Connection -> Text.Text -> IO GraphQL.Response

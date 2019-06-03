@@ -11,7 +11,7 @@ import qualified Data.Yaml as Yaml
 import Control.Monad.IO.Class (liftIO)
 import qualified Utils
 import Models (LoginRequest (..))
-import Models.TokenObject (TokenObject (..))
+import Models.AuthResponse (AuthResponse (..))
 import qualified Db
 import qualified Rest.Auth as Auth
 
@@ -75,8 +75,8 @@ signinHandler authKey dbConn = do
     (Right LoginRequest { _email, _password }) -> do
       userId <- liftIO $ Db.setUser dbConn _email _password
       case userId of
-        [x] -> do
+        [(PSQL.Only x)] -> do
           token <- liftIO $ Auth.createToken authKey $ (T.pack . show) x
-          Utils.makeDataResponse $ TokenObject token
+          Utils.makeDataResponse $ AuthResponse x token
         _ -> Utils.makeInternalErrorResponse
     (Left err) -> errorToStatus err

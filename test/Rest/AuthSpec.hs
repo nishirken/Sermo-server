@@ -12,7 +12,7 @@ import Data.Text.Encoding (encodeUtf8)
 import qualified Db
 import Models.DbFullUserCreds (DbFullUserCreds (..))
 import Rest.Auth (createToken, isAuthorizedHandler, isTokenValid)
-import Models.TokenObject (TokenObject (..))
+import Models.AuthRequest (AuthRequest (..))
 import qualified Data.Yaml as Yaml
 import Control.Monad.IO.Class (liftIO)
 import Config (makeTestConfig, Config (..))
@@ -32,4 +32,4 @@ authSpecIO = with loginPreparation $ describe "Authorization" $ do
     token <- liftIO (do
       config <- makeTestConfig
       makeTestToken config)
-    post (encodeUtf8 "/auth") (fromValue $ Yaml.toJSON $ TokenObject token) `shouldRespondWith` [json|{ data: { success: true }, error: null }|])
+    post (encodeUtf8 "/auth") (fromValue $ Yaml.toJSON $ AuthRequest token) `shouldRespondWith` [json|{ data: { success: true }, error: null }|])

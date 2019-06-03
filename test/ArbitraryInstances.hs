@@ -9,8 +9,8 @@ import Models (
   , SuccessResponse (..)
   , GraphQLRequest (..)
   )
-import Models.TokenObject (TokenObject (..))
-import Models.GraphQLErrorResponse (GraphQLErrorResponse (..), GraphQLError (..))
+import Models.AuthRequest (AuthRequest (..))
+import Models.AuthResponse (AuthResponse (..))
 import Data.Text as Text
 
 arbitraryText :: Gen Text
@@ -36,11 +36,8 @@ instance Arbitrary SuccessResponse where
 instance Arbitrary GraphQLRequest where
   arbitrary = GraphQLRequest <$> arbitraryText <*> arbitraryText
 
-instance Arbitrary GraphQLError where
-  arbitrary = GraphQLError <$> arbitraryText
+instance Arbitrary AuthRequest where
+  arbitrary = AuthRequest <$> arbitraryText
 
-instance Arbitrary GraphQLErrorResponse where
-  arbitrary = GraphQLErrorResponse <$> (arbitrary :: Gen [GraphQLError])
-
-instance Arbitrary TokenObject where
-  arbitrary = TokenObject <$> arbitraryText
+instance Arbitrary AuthResponse where
+  arbitrary = AuthResponse <$> arbitrary <*> arbitraryText

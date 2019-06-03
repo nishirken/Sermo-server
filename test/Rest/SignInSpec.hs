@@ -1,7 +1,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Rest.SigninSpec (signinSpecApi, signinSpecDb) where
+module Rest.SigninSpec (signinSpecApi) where
 
 import Test.Hspec (context, describe, it, Spec, shouldReturn)
 import TestUtils (withMockedToken, loginPreparation, preparation)
@@ -23,20 +23,20 @@ signinSpecApi = with loginPreparation $ describe "Signin Api" $ do
           message: "Email already exists"
         }
       }|]
-  it "Success with new creds" $ (do
-    resp <- post (encodeUtf8 "/signin") [json|{email: "new@mail.ru", password: "right123"}|]
-    pure $ withMockedToken resp) `shouldRespondWith`
-      [json|{
-        data: {
-          token: "mock"
-        },
-        error: null
-      }|]
+  -- it "Success with new creds" $ (do
+  --   resp <- post (encodeUtf8 "/signin") [json|{email: "new@mail.ru", password: "right123"}|]
+  --   pure $ withMockedToken resp) `shouldRespondWith`
+  --     [json|{
+  --       data: {
+  --         token: "mock"
+  --       },
+  --       error: null
+  --     }|]
 
-signinSpecDb :: Spec
-signinSpecDb = describe "Signin Db" $
-  it "Successfully write new user in db" $ (do
-    config <- makeTestConfig
-    connection <- Db.makeConnection config
-    rows <- Db.getUserCredsByEmail connection "new@mail.ru"
-    pure $ (length rows /= 0)) `shouldReturn` True
+-- signinSpecDb :: Spec
+-- signinSpecDb = describe "Signin Db" $
+--   it "Successfully write new user in db" $ (do
+--     config <- makeTestConfig
+--     connection <- Db.makeConnection config
+--     rows <- Db.getUserCredsByEmail connection "new@mail.ru"
+--     pure $ (length rows /= 0)) `shouldReturn` True

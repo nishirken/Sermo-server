@@ -36,7 +36,7 @@ import Network.Wai (Middleware, mapResponseHeaders, mapResponseStatus)
 import Network.Wai.Internal (Request (..), Response (..))
 import Network.HTTP.Types (status401)
 import Models (SuccessResponse (..))
-import Models.TokenObject (TokenObject (..))
+import Models.AuthRequest (AuthRequest (..))
 import Web.Scotty (ActionM, jsonData)
 import Control.Monad.IO.Class (liftIO)
 import qualified Database.PostgreSQL.Simple as PSQL
@@ -95,6 +95,6 @@ isTokenValid authKey token dbConn =
 
 isAuthorizedHandler :: T.Text -> PSQL.Connection -> ActionM ()
 isAuthorizedHandler authKey conn = do
-  TokenObject { _token } <- jsonData :: ActionM TokenObject
+  AuthRequest { _token } <- jsonData :: ActionM AuthRequest
   isValid <- liftIO $ isTokenValid authKey _token conn
   Utils.makeDataResponse $ SuccessResponse isValid
