@@ -3,7 +3,6 @@
 module Utils where
 
 import qualified Data.Yaml as Yaml
-import qualified Rest.Auth as Auth
 import Data.Yaml ((.=))
 import qualified Data.Text as Text
 import qualified Web.Scotty as Scotty

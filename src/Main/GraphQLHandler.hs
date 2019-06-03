@@ -12,15 +12,13 @@ import Control.Monad.IO.Class (liftIO)
 import Models.GraphQLErrorResponse (GraphQLErrorResponse (..), GraphQLError (..))
 import Models.GraphQLRequest (GraphQLRequest (..))
 
-type QueryHandler = PSQL.Connection -> Text.Text -> IO GraphQL.Response
+type GraphqlResponseHandler = PSQL.Connection -> Text.Text -> IO GraphQL.Response
 
-graphqlHandler :: Text.Text -> PSQL.Connection -> QueryHandler -> Scotty.ActionM ()
+graphqlHandler :: Text.Text -> PSQL.Connection -> GraphqlResponseHandler -> Scotty.ActionM ()
 graphqlHandler authKey dbConn handler = do
   GraphQLRequest {..} <- Scotty.jsonData :: Scotty.ActionM GraphQLRequest
-  resp <- (liftIO $ do
-    isAuthorized <- Auth.isTokenValid authKey _token dbConn
-    if isAuthorized == True
-      then handler dbConn _body
-      else GraphQLErrorResponse $ GraphQLError "Not authorized"
-    )
-  Scotty.json resp
+  isAuthorized <- (liftIO $ Auth.isTokenValid authKey _token dbConn)
+  response <- (if isAuthorized == True
+    then (liftIO $ handler dbConn _body)
+    else pure $ GraphQLErrorResponse [GraphQLError "Not authorized"])
+  Scotty.json response
