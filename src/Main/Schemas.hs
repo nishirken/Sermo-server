@@ -11,7 +11,7 @@ import GraphQL.API (Argument, Object, Field, (:>), List)
 import GraphQL.Resolver (Handler, (:<>) (..), ResolverError (..), Result (..))
 import GraphQL.Value.ToValue (toValue)
 import Data.Int (Int32)
-import qualified Utils
+import Main.GraphQLHandler (GraphqlResponseHandler)
 import qualified Database.PostgreSQL.Simple as PSQL
 import qualified Data.Text as Text
 import qualified Db
@@ -44,5 +44,5 @@ rootQueryHandler dbConn = pure $ \userId -> do
       pure $ Just $ userHandler (fromIntegral _id :: Int32) _email friends
     _ -> pure Nothing
 
-interpretRootQuery :: Utils.QueryHandler
+interpretRootQuery :: GraphqlResponseHandler
 interpretRootQuery dbConn = interpretAnonymousQuery @RootQuery $ rootQueryHandler dbConn

@@ -8,6 +8,8 @@ import qualified Data.Text as Text
 import qualified Web.Scotty as Scotty
 import qualified Rest.Auth as Auth
 import qualified GraphQL
+import qualified GraphQL.Internal.Output as InternalGraphQL
+import qualified Data.List.NonEmpty as NonEmptyList
 import Control.Monad.IO.Class (liftIO)
 import Models.GraphQLErrorResponse (GraphQLErrorResponse (..), GraphQLError (..))
 import Models.GraphQLRequest (GraphQLRequest (..))
@@ -20,5 +22,5 @@ graphqlHandler authKey dbConn handler = do
   isAuthorized <- (liftIO $ Auth.isTokenValid authKey _token dbConn)
   response <- (if isAuthorized == True
     then (liftIO $ handler dbConn _body)
-    else pure $ GraphQLErrorResponse [GraphQLError "Not authorized"])
+    else pure $ GraphQL.PreExecutionFailure $ NonEmptyList.fromList [InternalGraphQL.Error "Not authorized" []])
   Scotty.json response

@@ -9,6 +9,7 @@ import Network.Wai.Middleware.Cors (cors, CorsResourcePolicy (..))
 import Database.PostgreSQL.Simple (Connection)
 import Rest.Login (loginHandler)
 import Rest.Signin (signinHandler)
+import Main.GraphQLHandler (graphqlHandler)
 import Rest.Auth (isAuthorizedHandler)
 import qualified Data.Yaml as Yaml
 import Data.Text.Encoding (encodeUtf8)
@@ -39,6 +40,6 @@ routes :: Connection -> Config -> ScottyM ()
 routes dbConn Config{ authKey } = do
   post "/login" $ loginHandler authKey dbConn
   post "/signin" $ signinHandler authKey dbConn
-  post "/graphql" $ Utils.graphqlHandler authKey dbConn interpretRootQuery
+  post "/graphql" $ graphqlHandler authKey dbConn interpretRootQuery
   post "/auth" $ isAuthorizedHandler authKey dbConn
   notFound $ Utils.makeErrorResponse 404 $ Just "Method not found"
